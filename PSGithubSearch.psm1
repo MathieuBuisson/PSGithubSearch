@@ -36,30 +36,24 @@ Function Find-GitHubRepository {
 
         [Parameter(Position=3)]
         [ValidatePattern('^[\d<>][=\d]\d*$')]
-        [string]$Size,
+        [string]$SizeKB,
 
         [Parameter(Position=4)]
         [ValidateSet('true','only')]
         [string]$Fork,
 
         [Parameter(Position=5)]
-        [string]$Created,
-
-        [Parameter(Position=6)]
-        [string]$Pushed,
-
-        [Parameter(Position=7)]
         [string]$User,
 
-        [Parameter(Position=8)]
+        [Parameter(Position=6)]
         [ValidatePattern('^[\d<>][=\d]\d*$')]
         [string]$Stars,
 
-        [Parameter(Position=9)]
+        [Parameter(Position=7)]
         [ValidateSet('stars','forks','updated')]
         [string]$SortBy,
 
-        [Parameter(Position=10)]
+        [Parameter(Position=8)]
         [ValidateSet('asc','desc')]
         [string]$SortOrder
     )
@@ -70,12 +64,48 @@ Function Find-GitHubRepository {
     [string]$QueryStringValue = $KeywordsString
 
     If ( $Language ) {
-        
+        $QueryStringValue += '+language:' + $Language
+    }
+    If ( $In ) {
+        $QueryStringValue += '+in:' + $In
+    }
+    If ( $SizeKB ) {
+        $QueryStringValue += '+size:' + $SizeKB
+    }
+    If ( $Fork ) {
+        $QueryStringValue += '+fork:' + $Fork
+    }
+    If ( $User ) {
+        $QueryStringValue += '+user:' + $User
+    }
+    If ( $Stars ) {
+        $QueryStringValue += '+stars:' + $Stars
     }
 
-    $Uri = 'https://api.github.com/search/repositories?q=Deployment stuff+language:PowerShell&sort=stars&order=desc&per_page=100'
+    $QueryString.Add('q', $QueryStringValue)
+    If ( $SortBy ) {
+        $QueryString.Add('sort', $SortBy)
+    }
+    If ( $SortOrder ) {
+        $QueryString.Add('order', $SortOrder)
+    }
+    # Using the maximum number of results per page to limit the number of requests
+    $QueryString.Add('per_page', '100')
 
-    $Response = Invoke-WebRequest -Uri $Uri
+    $UriBuilder = New-Object System.UriBuilder -ArgumentList 'https://api.github.com'
+    $UriBuilder.Path = 'search/repositories' -as [uri]
+    $UriBuilder.Query = $QueryString.ToString()
+
+    $BaseUri = $UriBuilder.Uri
+    Write-Verbose "Constructed base URI : $($BaseUri.AbsoluteUri)"
+
+    $Response = Invoke-WebRequest -Uri $BaseUri
+    If ( $Response.StatusCode -ne 200 ) {
+
+        Write-Warning "The status code was $($Response.StatusCode) : $($Response.StatusDescription)"
+    }
+
+
     $PaginationInfo = $Response.Headers.Link
 
     If ( -not($PaginationInfo) ) {

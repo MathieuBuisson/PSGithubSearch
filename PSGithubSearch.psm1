@@ -10,15 +10,30 @@ Function Find-GitHubRepository {
 
     This API's documentation is available here : https://developer.github.com/v3/search/
     
-.PARAMETER <ParameterName>
+.PARAMETER Keywords
+
+.PARAMETER Language
+
+.PARAMETER In
+
+.PARAMETER SizeKB
+
+.PARAMETER Fork
+
+.PARAMETER User
+
+.PARAMETER Stars
+
+.PARAMETER SortBy
+
+.PARAMETER SortOrder
     
 .EXAMPLE
 
 .NOTES
     Author : Mathieu Buisson
     
-.LINK
-    
+.LINK    
     
 #>
     [CmdletBinding()]
@@ -101,19 +116,9 @@ Function Find-GitHubRepository {
 
         Write-Warning "The status code was $($Response.StatusCode) : $($Response.StatusDescription)"
     }
+    $NumberOfPages = Get-NumberofPages -SearchResult $Response
 
-    $PaginationInfo = $Response.Headers.Link
-
-    If ( -not($PaginationInfo) ) {
-        $LastPageNumber = 1
-    }
-    Else {
-        $SplitPaginationInfo = $PaginationInfo -split ', '
-        $LastPage = $SplitPaginationInfo | Where-Object { $_ -like '*"last"*' }
-        $LastPageNumber = (($LastPage -split '&page=')[1] -split '>')[0] -as [int]
-    }
-
-    Foreach ( $PageNumber in 1..$LastPageNumber ) {
+    Foreach ( $PageNumber in 1..$NumberOfPages ) {
 
         $ResultPageUri = $BaseUri.AbsoluteUri + "&page=$($PageNumber.ToString())"
 
@@ -141,4 +146,30 @@ Function Find-GitHubRepository {
             $PageResult
         }
     }
+}
+
+
+Function Get-NumberofPages {
+<#
+.SYNOPSIS
+    Helper function to get the number of pages from a search result response.    
+#>
+    [CmdletBinding()]
+    
+    Param(
+        [Parameter(Mandatory=$True,Position=0)]
+        [Microsoft.PowerShell.Commands.HtmlWebResponseObject]$SearchResult
+    )
+
+    $PaginationInfo = $SearchResult.Headers.Link
+
+    If ( -not($PaginationInfo) ) {
+        $NumberOfPages = 1
+    }
+    Else {
+        $SplitPaginationInfo = $PaginationInfo -split ', '
+        $LastPage = $SplitPaginationInfo | Where-Object { $_ -like '*"last"*' }
+        $NumberOfPages = (($LastPage -split '&page=')[1] -split '>')[0] -as [int]
+    }
+    return $NumberOfPages
 }

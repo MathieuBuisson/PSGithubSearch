@@ -25,7 +25,7 @@ Function Find-GitHubRepository {
     
     Param(
         [Parameter(Mandatory=$True,Position=0)]
-        [string]$KeywordsString,
+        [string[]]$Keywords,
 
         [Parameter(Position=1)]
         [string]$Language,
@@ -58,43 +58,40 @@ Function Find-GitHubRepository {
         [string]$SortOrder
     )
 
-    Add-Type -AssemblyName System.Web
-    $QueryString = [System.Web.HttpUtility]::ParseQueryString([string]::Empty)
-
-    [string]$QueryStringValue = $KeywordsString
+    [string]$KeywordsString = $Keywords -join '+'
+    [string]$QueryString = 'q=' + $KeywordsString
 
     If ( $Language ) {
-        $QueryStringValue += '+language:' + $Language
+        $QueryString += '+language:' + $Language
     }
     If ( $In ) {
-        $QueryStringValue += '+in:' + $In
+        $QueryString += '+in:' + $In
     }
     If ( $SizeKB ) {
-        $QueryStringValue += '+size:' + $SizeKB
+        $QueryString += '+size:' + $SizeKB
     }
     If ( $Fork ) {
-        $QueryStringValue += '+fork:' + $Fork
+        $QueryString += '+fork:' + $Fork
     }
     If ( $User ) {
-        $QueryStringValue += '+user:' + $User
+        $QueryString += '+user:' + $User
     }
     If ( $Stars ) {
-        $QueryStringValue += '+stars:' + $Stars
+        $QueryString += '+stars:' + $Stars
     }
-
-    $QueryString.Add('q', $QueryStringValue)
     If ( $SortBy ) {
-        $QueryString.Add('sort', $SortBy)
+        $QueryString += "&sort=$SortBy"
     }
     If ( $SortOrder ) {
-        $QueryString.Add('order', $SortOrder)
+        $QueryString += "&sort=$SortOrder"
     }
+
     # Using the maximum number of results per page to limit the number of requests
-    $QueryString.Add('per_page', '100')
+    $QueryString += '&per_page=100'
 
     $UriBuilder = New-Object System.UriBuilder -ArgumentList 'https://api.github.com'
     $UriBuilder.Path = 'search/repositories' -as [uri]
-    $UriBuilder.Query = $QueryString.ToString()
+    $UriBuilder.Query = $QueryString
 
     $BaseUri = $UriBuilder.Uri
     Write-Verbose "Constructed base URI : $($BaseUri.AbsoluteUri)"
@@ -104,7 +101,6 @@ Function Find-GitHubRepository {
 
         Write-Warning "The status code was $($Response.StatusCode) : $($Response.StatusDescription)"
     }
-
 
     $PaginationInfo = $Response.Headers.Link
 
@@ -119,7 +115,7 @@ Function Find-GitHubRepository {
 
     Foreach ( $PageNumber in 1..$LastPageNumber ) {
 
-        $ResultPageUri = $Uri + "&page=$($PageNumber.ToString())"
+        $ResultPageUri = $BaseUri.AbsoluteUri + "&page=$($PageNumber.ToString())"
 
         Try {
             $PageResponse  = Invoke-WebRequest -Uri $ResultPageUri -ErrorAction Stop
@@ -142,7 +138,7 @@ Function Find-GitHubRepository {
 
         Foreach ( $PageResult in $PageResponseContent.items ) {
 
-            $PageResult | Select-Object -Property full_name, html_url
+            $PageResult
         }
     }
 }

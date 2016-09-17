@@ -3,7 +3,7 @@
 Function Find-GitHubRepository {
 <#
 .SYNOPSIS
-    Finds repositories on GitHub.com according to the specified search keyword(s) and parameters.
+    Searches repositories on GitHub.com according to the specified search keyword(s) and parameters.
     
 .DESCRIPTION
     Uses the GitHub search API to find repositories on GitHub.com according to the specified search keyword(s) and parameters.
@@ -188,6 +188,73 @@ Function Find-GitHubRepository {
     }
 }
 
+Function Find-GitHubCode {
+<#
+.SYNOPSIS
+    Searches file contents on GitHub.com according to the specified search keyword(s) and parameters.
+    
+.DESCRIPTION
+    Uses the GitHub search API to find code in files on GitHub.com according to the specified search keyword(s) and parameters.
+
+    This API's documentation is available here : https://developer.github.com/v3/search/
+
+    NOTE : Due to the complexity of searching code, the GitHub Search API has a few restrictions on how searches are performed :
+        - Only the default branch is considered. In most cases, this will be the  master  branch.
+        - Only files smaller than 384 KB are searchable.
+        - Only repositories with fewer than 500,000 files are searchable.
+
+.EXAMPLE
+
+.NOTES
+    Author : Mathieu Buisson
+    
+.LINK
+    https://github.com/MathieuBuisson/PSGithubSearch
+#>
+    [CmdletBinding()]
+    
+    Param(
+        [Parameter(Mandatory=$True,Position=0)]
+        [string[]]$Keywords,
+
+        [Parameter(Position=1)]
+        [string]$Language,
+
+        [Parameter(Position=2)]
+        [ValidateSet('file','path')]
+        [string]$In,
+
+        [Parameter(Position=3)]
+        [ValidatePattern('^[\d<>][=\d]\d*$')]
+        [string]$SizeBytes,
+
+        [Parameter(Position=4)]
+        [switch]$Fork,
+
+        [Parameter(Position=5)]
+        [string]$User,
+
+        [Parameter(Position=5)]
+        [ValidatePattern('^[a-zA-Z]+/[a-zA-Z]+')]
+        [string]$Repo,
+
+        [Parameter(Position=6)]
+        [string]$FileName,
+
+        [Parameter(Position=7)]
+        [string]$Extension,
+
+        [Parameter(Position=8)]
+        [switch]$SortByLastIndexed
+    )
+
+    # Cleaning up the value of $Extension if the user puts a "dot" at the beginning
+    If ( $Extension -match '^\.' ) {
+        $Extension = $Extension.TrimStart('.')
+    }
+
+
+}
 
 Function Get-NumberofPages {
 <#

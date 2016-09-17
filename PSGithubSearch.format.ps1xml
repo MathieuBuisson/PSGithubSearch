@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Configuration>
+    <ViewDefinitions>
+        <View>
+            <Name>PSGithubSearch.Repository</Name>
+            <ViewSelectedBy>
+                <TypeName>PSGithubSearch.Repository</TypeName>
+            </ViewSelectedBy>
+            <ListControl>
+                <ListEntries>
+                    <ListEntry>
+                        <ListItems>
+                            <ListItem>
+                                <Label>Name</Label>
+                                <PropertyName>name</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Full Name</Label>
+                                <PropertyName>full_name</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Owner</Label>
+                                <ScriptBlock>$_.owner.login</ScriptBlock>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Url</Label>
+                                <PropertyName>html_url</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Description</Label>
+                                <PropertyName>description</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Fork</Label>
+                                <PropertyName>fork</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Last Updated</Label>
+                                <PropertyName>updated_at</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Last Pushed</Label>
+                                <PropertyName>pushed_at</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Clone Url</Label>
+                                <PropertyName>clone_url</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Size (KB)</Label>
+                                <PropertyName>size</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Stars</Label>
+                                <PropertyName>stargazers_count</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Language</Label>
+                                <PropertyName>language</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Forks</Label>
+                                <PropertyName>forks</PropertyName>
+                            </ListItem>
+                        </ListItems>
+                    </ListEntry>
+                </ListEntries>
+            </ListControl>
+        </View>
+    </ViewDefinitions>
+</Configuration>

@@ -3,38 +3,83 @@
 Function Find-GitHubRepository {
 <#
 .SYNOPSIS
-    Finds repositories on GitHub.com according to the specified search query and parameters.
+    Finds repositories on GitHub.com according to the specified search keyword(s) and parameters.
     
 .DESCRIPTION
-    Uses the GitHub search API to find repositories on GitHub.com according to the specified search query and parameters.
+    Uses the GitHub search API to find repositories on GitHub.com according to the specified search keyword(s) and parameters.
 
     This API's documentation is available here : https://developer.github.com/v3/search/
+
+    NOTE : The GitHub Search API limits each search to 1,000 results and the number of requests to 10 per minute.
     
 .PARAMETER Keywords
+    One or more keywords to search.
 
 .PARAMETER Language
+    To search repositories based on the language they are written in.
 
 .PARAMETER In
+    To qualify which field is searched. With this qualifier you can restrict the search to just the repository name, description, or readme.
+    If not specified, the default behaviour is to search in both the name, description and readme.
 
 .PARAMETER SizeKB
+    To search repositories that match a certain size (in kilobytes).
 
 .PARAMETER Fork
+    Filters whether forked repositories should be included ( if the value is 'true' ) or only forked repositories should be returned ( if the value is 'only' ).
+    If this parameter is not specified, the default behaviour is to exclude forks.
 
 .PARAMETER User
+    To Limit searches to repositories owned by a specific user.
+    If the value of this parameter doesn't match exactly with an existing GitHub user name, it throws an error.
 
 .PARAMETER Stars
+    To filter repositories based on the number of stars.
 
 .PARAMETER SortBy
+    To specify on which field the results should be sorted on : number of stars, forks or last updated date.
+    If not specified, the default behaviour sorts the results by best match.
 
-.PARAMETER SortOrder
-    
 .EXAMPLE
+    Find-GitHubRepository -Keywords 'TCP' -Language 'Python'
+
+    Searches GitHub repositories which have the word "TCP" in their name or description or readme and are written in Python.
+
+.EXAMPLE
+    Find-GitHubRepository -Keywords 'TCP' -Language 'Python' -In name
+
+    Searches GitHub repositories which have the word "TCP" in their name and are written in Python.
+
+.EXAMPLE
+    Find-GitHubRepository -Keywords 'UDP' -In description -SizeKB '>200'
+
+    Searches GitHub repositories which have the word "UDP" in their description and are larger than 200 kilobytes.
+
+.EXAMPLE
+    Find-GitHubRepository -Keywords 'PowerShell-Docs' -In name -Fork only
+
+    Searches forks which have the word "PowerShell-Docs" in their name.
+
+.EXAMPLE
+    Find-GitHubRepository -Keywords 'script' -User 'MathieuBuisson'
+
+    Searches GitHub repositories which have the word "script" in their name or description or readme and are owned by the user MathieuBuisson.
+
+.EXAMPLE
+    Find-GitHubRepository -Keywords 'disk','space' -In readme -Stars '>=10'
+
+    Searches GitHub repositories which have both words "disk" and "space" in their readme and have 10 or more stars.
+
+.EXAMPLE
+    Find-GitHubRepository -SortBy stars -In name -Language 'PowerShell' -Keywords 'Pester'
+
+    Searches GitHub repositories written in PowerShell which have the word "Pester" in their name and sorts them by the number of stars (descending order).
 
 .NOTES
     Author : Mathieu Buisson
     
-.LINK    
-    
+.LINK
+    https://github.com/MathieuBuisson/PSGithubSearch
 #>
     [CmdletBinding()]
     
@@ -66,11 +111,7 @@ Function Find-GitHubRepository {
 
         [Parameter(Position=7)]
         [ValidateSet('stars','forks','updated')]
-        [string]$SortBy,
-
-        [Parameter(Position=8)]
-        [ValidateSet('asc','desc')]
-        [string]$SortOrder
+        [string]$SortBy
     )
 
     [string]$KeywordsString = $Keywords -join '+'
@@ -97,9 +138,6 @@ Function Find-GitHubRepository {
     If ( $SortBy ) {
         $QueryString += "&sort=$SortBy"
     }
-    If ( $SortOrder ) {
-        $QueryString += "&sort=$SortOrder"
-    }
 
     # Using the maximum number of results per page to limit the number of requests
     $QueryString += '&per_page=100'
@@ -117,6 +155,7 @@ Function Find-GitHubRepository {
         Write-Warning "The status code was $($Response.StatusCode) : $($Response.StatusDescription)"
     }
     $NumberOfPages = Get-NumberofPages -SearchResult $Response
+    Write-Verbose "Number of pages for this search result : $($NumberOfPages)"
 
     Foreach ( $PageNumber in 1..$NumberOfPages ) {
 
@@ -143,6 +182,7 @@ Function Find-GitHubRepository {
 
         Foreach ( $PageResult in $PageResponseContent.items ) {
 
+            $PageResult.psobject.TypeNames.Insert(0,'PSGithubSearch.Repository')
             $PageResult
         }
     }

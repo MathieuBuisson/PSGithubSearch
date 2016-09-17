@@ -98,3 +98,25 @@ Describe 'Search qualifiers behaviour' {
         }
     }
 }
+Describe 'Sorting and ordering of search results' {
+
+    It 'When the $SortBy value is "stars", any result has more stars than the next one' {
+        
+        $SortByTest = Find-GitHubRepository -Keywords 'Pester' -SortBy stars -In name -Language 'PowerShell'
+
+        Foreach ( $ResultIndex in 0.. ($SortByTest.Count - 2) ) {
+            $SortByTest[$ResultIndex].stargazers_count + 1 |
+            Should BeGreaterThan $SortByTest[$ResultIndex + 1].stargazers_count
+        }
+
+    }
+    It "When the $SortBy value is 'forks', any result has more forks than the next one" {
+
+        $SortbyForksTest = Find-GitHubRepository -Keywords 'Pester' -SortBy forks -In name -Language 'PowerShell'
+
+        Foreach ( $ResultIndex in 0.. ($SortbyForksTest.Count - 2) ) {
+            $SortbyForksTest[$ResultIndex].forks + 1 |
+            Should BeGreaterThan $SortbyForksTest[$ResultIndex + 1].forks
+        }
+    }
+}

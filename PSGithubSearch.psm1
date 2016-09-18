@@ -371,6 +371,81 @@ Function Find-GitHubCode {
     }
 }
 
+Function Find-GitHubIssue {
+<#
+.SYNOPSIS
+    
+.DESCRIPTION
+
+.PARAMETER Keywords
+
+.PARAMETER User
+
+.PARAMETER Repo
+
+.PARAMETER Language
+
+.PARAMETER In
+        
+.EXAMPLE
+
+.NOTES
+    Author : Mathieu Buisson
+    
+.LINK
+    https://github.com/MathieuBuisson/PSGithubSearch
+#>
+    [CmdletBinding()]
+    
+    Param(
+        [Parameter(Position=0)]
+        [string[]]$Keywords,
+
+        [Parameter(Position=1)]
+        [ValidateSet('issue','pr')]
+        [string]$Type,
+
+        [Parameter(Position=2)]
+        [ValidateSet('title','body','comments')]
+        [string]$In,
+
+        [Parameter(Position=1,ParameterSetName='Repo')]
+        [ValidatePattern('^[a-zA-Z]+/[a-zA-Z]+')]
+        [string]$Repo,
+
+        [Parameter(Position=2)]
+        [string]$Language,
+
+        [Parameter(Position=4)]
+        [ValidatePattern('^[\d<>][=\d]\d*$')]
+        [string]$SizeBytes,
+
+        [Parameter(Position=5)]
+        [switch]$Fork,
+
+        [Parameter(Position=6)]
+        [string]$FileName,
+
+        [Parameter(Position=7)]
+        [string]$Extension,
+
+        [Parameter(Position=8)]
+        [switch]$SortByLastIndexed
+    )
+
+    [string]$QueryString = 'q='
+    If ( $Keywords ) {
+        $QueryString += ($Keywords -join '+')
+    }
+    If ( $Type ) {
+        $QueryString += '+type:' + $Type
+    }
+    If ( $In ) {
+        $QueryString += '+in:' + $In
+    }
+
+}
+
 Function Get-NumberofPages {
 <#
 .SYNOPSIS

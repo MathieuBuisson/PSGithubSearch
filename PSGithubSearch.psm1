@@ -38,7 +38,7 @@ Function Find-GitHubRepository {
 
 .PARAMETER SortBy
     To specify on which field the results should be sorted on : number of stars, forks or last updated date.
-    If not specified, the default behaviour sorts the results by best match.
+    By default, the results are sorted by best match.
 
 .EXAMPLE
     Find-GitHubRepository -Keywords 'TCP' -Language 'Python'
@@ -175,8 +175,8 @@ Function Find-GitHubRepository {
 
         If ( $RemainingRequestsNumber -le 1 ) {
             Write-Warning "The search API limits the number of requests to 10 requests per minute"
-            Write-Warning "Stopped processing the remaining result pages because we have exceeded this limit."
-            break
+            Write-Warning "Waiting 61 seconds before processing the remaining result pages because we have exceeded this limit."
+            Start-Sleep -Seconds 61
         }
         $PageResponseContent = $PageResponse.Content | ConvertFrom-Json
 
@@ -203,7 +203,45 @@ Function Find-GitHubCode {
         - Only files smaller than 384 KB are searchable.
         - Only repositories with fewer than 500,000 files are searchable.
 
+.PARAMETER Keywords
+    One or more keywords or code snippet to search.
+
+.PARAMETER User
+    To Limit searches to code owned by a specific user.
+    If the value of this parameter doesn't match exactly with an existing GitHub user name, it throws an error.
+
+.PARAMETER Repo
+    To Limit searches to code in a specific repository.
+    The value of this parameter must match exactly with the full name of an existing GitHub repository, formatted as : Username/RepoName.
+
+.PARAMETER Language
+    To search code based on the language it is written in.
+
+.PARAMETER In
+    To qualify which field is searched. With this qualifier you can restrict the search to files contents or to files paths.
+    If not specified, the default behaviour is to search in both files contents and paths.
+        
+.PARAMETER SizeBytes
+    To search only files that match a certain size (in bytes).
+
+.PARAMETER Fork
+    Filters whether forked repositories should be included in the search.
+    By default, forks are not searched unless the fork has more stars than the parent repository.
+
+.PARAMETER FileName
+    Filters the search to files with a name containing the string specified via this parameter.
+
+.PARAMETER Extension
+    Filters the search to files with the specified extension.
+
+.PARAMETER SortByLastIndexed
+    Sorts the results by how recently a file has been indexed by the GitHub search infrastructure.
+    By default, the results are sorted by best match.
+
 .EXAMPLE
+    Find-GitHubCode -User 'MathieuBuisson' -Keywords 'SupportsShouldProcess' -Extension 'psm1'
+
+    Finds the .psm1 files which contain the code 'SupportsShouldProcess' in repositories from the user 'MathieuBuisson'.
 
 .NOTES
     Author : Mathieu Buisson
@@ -211,32 +249,32 @@ Function Find-GitHubCode {
 .LINK
     https://github.com/MathieuBuisson/PSGithubSearch
 #>
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='User')]
     
     Param(
         [Parameter(Mandatory=$True,Position=0)]
         [string[]]$Keywords,
 
-        [Parameter(Position=1)]
-        [string]$Language,
+        [Parameter(Position=1,ParameterSetName='User')]
+        [string]$User,
+
+        [Parameter(Position=1,ParameterSetName='Repo')]
+        [ValidatePattern('^[a-zA-Z]+/[a-zA-Z]+')]
+        [string]$Repo,
 
         [Parameter(Position=2)]
+        [string]$Language,
+
+        [Parameter(Position=3)]
         [ValidateSet('file','path')]
         [string]$In,
 
-        [Parameter(Position=3)]
+        [Parameter(Position=4)]
         [ValidatePattern('^[\d<>][=\d]\d*$')]
         [string]$SizeBytes,
 
-        [Parameter(Position=4)]
+        [Parameter(Position=5)]
         [switch]$Fork,
-
-        [Parameter(Position=5)]
-        [string]$User,
-
-        [Parameter(Position=5)]
-        [ValidatePattern('^[a-zA-Z]+/[a-zA-Z]+')]
-        [string]$Repo,
 
         [Parameter(Position=6)]
         [string]$FileName,
@@ -253,7 +291,84 @@ Function Find-GitHubCode {
         $Extension = $Extension.TrimStart('.')
     }
 
+    [string]$KeywordsString = $Keywords -join '+'
+    [string]$QueryString = 'q=' + $KeywordsString
 
+    If ( $Language ) {
+        $QueryString += '+language:' + $Language
+    }
+    If ( $In ) {
+        $QueryString += '+in:' + $In
+    }
+    If ( $SizeBytes ) {
+        $QueryString += '+size:' + $SizeBytes
+    }
+    If ( $Fork ) {
+        $QueryString += '+fork:true'
+    }
+    If ( $User ) {
+        $QueryString += '+user:' + $User
+    }
+    If ( $Repo ) {
+        $QueryString += '+repo:' + $Repo
+    }
+    If ( $FileName ) {
+        $QueryString += '+filename:' + $FileName
+    }
+    If ( $Extension ) {
+        $QueryString += '+extension:' + $Extension
+    }
+    If ( $SortByLastIndexed ) {
+        $QueryString += "&sort=indexed"
+    }
+
+    # Using the maximum number of results per page to limit the number of requests
+    $QueryString += '&per_page=100'
+
+    $UriBuilder = New-Object System.UriBuilder -ArgumentList 'https://api.github.com'
+    $UriBuilder.Path = 'search/code' -as [uri]
+    $UriBuilder.Query = $QueryString
+
+    $BaseUri = $UriBuilder.Uri
+    Write-Verbose "Constructed base URI : $($BaseUri.AbsoluteUri)"
+
+    $Response = Invoke-WebRequest -Uri $BaseUri
+    If ( $Response.StatusCode -ne 200 ) {
+
+        Write-Warning "The status code was $($Response.StatusCode) : $($Response.StatusDescription)"
+    }
+    $NumberOfPages = Get-NumberofPages -SearchResult $Response
+    Write-Verbose "Number of pages for this search result : $($NumberOfPages)"
+
+    Foreach ( $PageNumber in 1..$NumberOfPages ) {
+
+        $ResultPageUri = $BaseUri.AbsoluteUri + "&page=$($PageNumber.ToString())"
+
+        Try {
+            $PageResponse  = Invoke-WebRequest -Uri $ResultPageUri -ErrorAction Stop
+        }
+        Catch {
+            Throw $_.Exception.Message
+        }
+
+        # The search API limits the number of requests to 10 requests per minute and per IP address (for unauthenticated requests)
+        # We might be subject to the limit on the number of requests if we run function multiple times in the last minute
+        $RemainingRequestsNumber = $PageResponse.Headers.'X-RateLimit-Remaining' -as [int]
+        Write-Verbose "Number of remaining API requests : $($RemainingRequestsNumber)."
+
+        If ( $RemainingRequestsNumber -le 1 ) {
+            Write-Warning "The search API limits the number of requests to 10 requests per minute"
+            Write-Warning "Stopped processing the remaining result pages because we have exceeded this limit."
+            Start-Sleep -Seconds 61
+        }
+        $PageResponseContent = $PageResponse.Content | ConvertFrom-Json
+
+        Foreach ( $PageResult in $PageResponseContent.items ) {            
+
+            $PageResult.psobject.TypeNames.Insert(0,'PSGithubSearch.Code')
+            $PageResult
+        }
+    }
 }
 
 Function Get-NumberofPages {

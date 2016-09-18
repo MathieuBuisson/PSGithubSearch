@@ -67,5 +67,47 @@
                 </ListEntries>
             </ListControl>
         </View>
+        <View>
+            <Name>PSGithubSearch.Code</Name>
+            <ViewSelectedBy>
+                <TypeName>PSGithubSearch.Code</TypeName>
+            </ViewSelectedBy>
+            <ListControl>
+                <ListEntries>
+                    <ListEntry>
+                        <ListItems>
+                            <ListItem>
+                                <Label>FileName</Label>
+                                <PropertyName>name</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>FilePath</Label>
+                                <PropertyName>path</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>File Url</Label>
+                                <PropertyName>html_url</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>File Details Url</Label>
+                                <PropertyName>url</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Repository Name</Label>
+                                <ScriptBlock>$_.repository.full_name</ScriptBlock>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Repository Description</Label>
+                                <ScriptBlock>$_.repository.description</ScriptBlock>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Repository Url</Label>
+                                <ScriptBlock>$_.repository.html_url</ScriptBlock>
+                            </ListItem>
+                        </ListItems>
+                    </ListEntry>
+                </ListEntries>
+            </ListControl>
+        </View>
     </ViewDefinitions>
 </Configuration>

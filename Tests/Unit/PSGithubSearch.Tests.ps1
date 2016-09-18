@@ -1,122 +1,189 @@
 $ModuleName = 'PSGithubSearch'
 Import-Module "$($PSScriptRoot)\..\..\$($ModuleName).psm1" -Force
 
-Describe 'Keywords' {
+Describe 'Find-GitHubRepository' {
     
-    It 'All results have the specified keyword' {
+    Context 'Keywords' {
+    
+        It 'All results have the specified keyword' {
 
-        $KeywordTest = Find-GitHubRepository -Keywords 'PowerShell' -User 'MathieuBuisson' -In description
+            $KeywordTest = Find-GitHubRepository -Keywords 'PowerShell' -User 'MathieuBuisson' -In description
 
-        Foreach ( $Result in $KeywordTest ) {
-            $Result.description | Should Match 'PowerShell'
+            Foreach ( $Result in $KeywordTest ) {
+                $Result.description | Should Match 'PowerShell'
+            }
         }
-    }
-    It 'All results have the specified keywords when multiple keywords are specified' {
+        It 'All results have the specified keywords when multiple keywords are specified' {
         
-        $KeywordTest = Find-GitHubRepository -Keywords 'PowerShell','module' -User 'MathieuBuisson' -In description
+            $KeywordTest = Find-GitHubRepository -Keywords 'PowerShell','module' -User 'MathieuBuisson' -In description
 
-        Foreach ( $Result in $KeywordTest ) {
-            $Result.description | Should Match 'PowerShell'
-        }
-        Foreach ( $Result in $KeywordTest ) {
-            $Result.description | Should Match 'module'
+            Foreach ( $Result in $KeywordTest ) {
+                $Result.description | Should Match 'PowerShell'
+            }
+            Foreach ( $Result in $KeywordTest ) {
+                $Result.description | Should Match 'module'
+            }
         }
     }
-}
 
-Describe 'Search qualifiers behaviour' {
+    Context 'Search qualifiers behaviour' {
        
-    It 'All results have the specified language' {
+        It 'All results have the specified language' {
         
-        $LanguageTest = Find-GitHubRepository -Keywords 'script' -Language 'PowerShell' -User 'MathieuBuisson'
+            $LanguageTest = Find-GitHubRepository -Keywords 'script' -Language 'PowerShell' -User 'MathieuBuisson'
 
-        Foreach ( $Result in $LanguageTest ) {
-            $Result.language | Should Be 'PowerShell'
+            Foreach ( $Result in $LanguageTest ) {
+                $Result.language | Should Be 'PowerShell'
+            }
+        }
+        It 'All results have the specified keyword in the field specified via the In parameter' {
+        
+            $InTest = Find-GitHubRepository -Keywords 'PowerShell-' -In name -User 'MathieuBuisson'
+
+            Foreach ( $Result in $InTest ) {
+                $Result.name | Should Match 'PowerShell-'
+            }
+        }
+        It 'All results match the size filter (greater than) specified via the SizeKB parameter' {
+        
+            $SizeKBTest = Find-GitHubRepository -Keywords 'PowerShell' -User 'MathieuBuisson' -SizeKB '>59'
+
+            Foreach ( $Result in $SizeKBTest ) {
+                $Result.size | Should BeGreaterThan 59
+            }
+        }
+        It 'All results match the size filter (less than) specified via the SizeKB parameter' {
+        
+            $SizeKBTest_LessThan = Find-GitHubRepository -Keywords 'PowerShell' -User 'MathieuBuisson' -SizeKB '<58'
+
+            Foreach ( $Result in $SizeKBTest_LessThan ) {
+                $Result.size | Should BeLessThan 58
+            }
+        }
+        It 'All results are NOT forks if the Fork parameter is not used' {
+        
+            $NoFork = Find-GitHubRepository -Keywords 'PowerShell-Docs' -In name -SizeKB '>400'
+
+            Foreach ( $Result in $NoFork ) {
+                $Result.fork | Should Be $False
+            }
+        }
+        It 'All results are forks if the Fork parameter has the value "only"' {
+        
+            $OnlyFork = Find-GitHubRepository -Keywords 'PowerShell-Docs' -In name -SizeKB '>400' -Fork only
+
+            Foreach ( $Result in $OnlyFork ) {
+                $Result.fork | Should Be $True
+            }
+        }
+        It 'All results have the owner specified via the User parameter' {
+        
+            $UserTest = Find-GitHubRepository -Keywords 'script' -User 'MathieuBuisson'
+
+            Foreach ( $Result in $UserTest ) {
+                $Result.owner.login | Should match 'MathieuBuisson'
+            }
+        }
+        It 'All results match the stars filter specified via the Stars parameter' {
+        
+            $StarsTest = Find-GitHubRepository -Keywords 'script' -User 'MathieuBuisson' -Stars '>=1'
+
+            Foreach ( $Result in $StarsTest ) {
+                $Result.stargazers_count | Should BeGreaterThan 0
+            }
         }
     }
-    It 'All results have the specified keyword in the field specified via the In parameter' {
-        
-        $InTest = Find-GitHubRepository -Keywords 'PowerShell-' -In name -User 'MathieuBuisson'
+    Context 'Sorting of search results' {
 
-        Foreach ( $Result in $InTest ) {
-            $Result.name | Should Match 'PowerShell-'
+        It 'When the $SortBy value is "stars", any result has more stars than the next one' {
+        
+            $SortByTest = Find-GitHubRepository -Keywords 'Pester' -SortBy stars -In name -Language 'PowerShell'
+
+            Foreach ( $ResultIndex in 0.. ($SortByTest.Count - 2) ) {
+                $SortByTest[$ResultIndex].stargazers_count + 1 |
+                Should BeGreaterThan $SortByTest[$ResultIndex + 1].stargazers_count
+            }
+
         }
-    }
-    It 'All results match the size filter (greater than) specified via the SizeKB parameter' {
-        
-        $SizeKBTest = Find-GitHubRepository -Keywords 'PowerShell' -User 'MathieuBuisson' -SizeKB '>59'
+        It "When the $SortBy value is 'forks', any result has more forks than the next one" {
 
-        Foreach ( $Result in $SizeKBTest ) {
-            $Result.size | Should BeGreaterThan 59
-        }
-    }
-    # Waiting 1 minute because the GitHub Search API limits to 10 requests per minute
-    Start-Sleep -Seconds 61
+            $SortbyForksTest = Find-GitHubRepository -Keywords 'Pester' -SortBy forks -In name -Language 'PowerShell'
 
-    It 'All results match the size filter (less than) specified via the SizeKB parameter' {
-        
-        $SizeKBTest_LessThan = Find-GitHubRepository -Keywords 'PowerShell' -User 'MathieuBuisson' -SizeKB '<58'
-
-        Foreach ( $Result in $SizeKBTest_LessThan ) {
-            $Result.size | Should BeLessThan 58
-        }
-    }
-    It 'All results are NOT forks if the Fork parameter is not used' {
-        
-        $NoFork = Find-GitHubRepository -Keywords 'PowerShell-Docs' -In name -SizeKB '>400'
-
-        Foreach ( $Result in $NoFork ) {
-            $Result.fork | Should Be $False
-        }
-    }
-    Start-Sleep -Seconds 61
-
-    It 'All results are forks if the Fork parameter has the value "only"' {
-        
-        $OnlyFork = Find-GitHubRepository -Keywords 'PowerShell-Docs' -In name -SizeKB '>400' -Fork only
-
-        Foreach ( $Result in $OnlyFork ) {
-            $Result.fork | Should Be $True
-        }
-    }
-    Start-Sleep -Seconds 61
-
-    It 'All results have the owner specified via the User parameter' {
-        
-        $UserTest = Find-GitHubRepository -Keywords 'script' -User 'MathieuBuisson'
-
-        Foreach ( $Result in $UserTest ) {
-            $Result.owner.login | Should match 'MathieuBuisson'
-        }
-    }
-    It 'All results match the size filter specified via the Stars parameter' {
-        
-        $StarsTest = Find-GitHubRepository -Keywords 'script' -User 'MathieuBuisson' -Stars '>=1'
-
-        Foreach ( $Result in $StarsTest ) {
-            $Result.stargazers_count | Should BeGreaterThan 0
+            Foreach ( $ResultIndex in 0.. ($SortbyForksTest.Count - 2) ) {
+                $SortbyForksTest[$ResultIndex].forks + 1 |
+                Should BeGreaterThan $SortbyForksTest[$ResultIndex + 1].forks
+            }
         }
     }
 }
-Describe 'Sorting and ordering of search results' {
 
-    It 'When the $SortBy value is "stars", any result has more stars than the next one' {
+Describe 'Find-GitHubCode' {
+    
+    Context 'Defaut parameter set using positional parameters' {
         
-        $SortByTest = Find-GitHubRepository -Keywords 'Pester' -SortBy stars -In name -Language 'PowerShell'
+        It 'Should use the defaut parameter set and bind the second argument to the User parameter' {
+            
+            $ParamSetTest = Find-GitHubCode 'SupportsShouldProcess' 'MathieuBuisson'
 
-        Foreach ( $ResultIndex in 0.. ($SortByTest.Count - 2) ) {
-            $SortByTest[$ResultIndex].stargazers_count + 1 |
-            Should BeGreaterThan $SortByTest[$ResultIndex + 1].stargazers_count
+            Foreach ( $Result in $ParamSetTest ) {
+                $Result.repository.owner.login | Should Be 'MathieuBuisson'
+            }
         }
-
     }
-    It "When the $SortBy value is 'forks', any result has more forks than the next one" {
+    Context 'Keywords' {
+        
+        It 'All file results have the specified keyword in their path' {
 
-        $SortbyForksTest = Find-GitHubRepository -Keywords 'Pester' -SortBy forks -In name -Language 'PowerShell'
+            $KeywordTest = Find-GitHubCode -Keywords 'Deployment' -User 'MathieuBuisson' -In path
 
-        Foreach ( $ResultIndex in 0.. ($SortbyForksTest.Count - 2) ) {
-            $SortbyForksTest[$ResultIndex].forks + 1 |
-            Should BeGreaterThan $SortbyForksTest[$ResultIndex + 1].forks
+            Foreach ( $Result in $KeywordTest ) {
+                $Result.path | Should Match 'Deployment'
+            }
+        }
+        It 'All results have the specified keywords when multiple keywords are specified' {
+        
+            $KeywordTest2 = Find-GitHubCode -Keywords 'Deployment','Validation' -User 'MathieuBuisson' -In path
+
+            Foreach ( $Result in $KeywordTest2 ) {
+                $Result.path | Should Match 'Deployment'
+            }
+            Foreach ( $Result in $KeywordTest2 ) {
+                $Result.path | Should Match 'Validation'
+            }
+        }
+    }
+    Context 'Search qualifiers behaviour' {
+
+        It 'All results are from the repository specified via the Repo parameter' {
+
+            $RepoTest = Find-GitHubCode -Keywords 'CmdletBinding()' -Repo 'MathieuBuisson/DeploymentReadinessChecker'
+
+            Foreach ( $Result in $RepoTest ) {
+                $Result.repository.full_name | Should Be 'MathieuBuisson/DeploymentReadinessChecker'
+            }
+
+        }
+        It 'All file results match the size filter (less than) specified via the SizeBytes parameter' {
+            
+            $SizeTest = Find-GitHubCode -Keywords 'socket' -Language 'go' -User 'googollee' -SizeBytes '<150'
+            $FileDetails = Invoke-RestMethod -Uri $SizeTest[0].url
+            $FileDetails.size | Should BeLessThan 150
+        }
+        It 'All file results have the string specified via the FileName parameter in their name' {
+            
+            $FileNameTest = Find-GitHubCode -Keywords 'Computer' -User 'MathieuBuisson' -FileName 'Tests'
+
+            Foreach ( $Result in $FileNameTest ) {
+                $Result.name | Should Match 'Tests'
+            }
+        }
+        It 'All file results have the extension specified via the Extension parameter' {
+            
+            $ExtensionTest = Find-GitHubCode -Keywords 'ComputerName' -User 'MathieuBuisson' -Extension 'psm1'
+            
+            Foreach ( $Result in $ExtensionTest ) {
+                $Result.name | Should Match '\.psm1$'
+            }
         }
     }
 }

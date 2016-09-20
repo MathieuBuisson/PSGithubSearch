@@ -175,8 +175,8 @@ Function Find-GitHubRepository {
 
         If ( $RemainingRequestsNumber -le 1 ) {
             Write-Warning "The search API limits the number of requests to 10 requests per minute"
-            Write-Warning "Waiting 61 seconds before processing the remaining result pages because we have exceeded this limit."
-            Start-Sleep -Seconds 61
+            Write-Warning "Waiting 60 seconds before processing the remaining result pages because we have exceeded this limit."
+            Start-Sleep -Seconds 60
         }
         $PageResponseContent = $PageResponse.Content | ConvertFrom-Json
 
@@ -358,8 +358,8 @@ Function Find-GitHubCode {
 
         If ( $RemainingRequestsNumber -le 1 ) {
             Write-Warning "The search API limits the number of requests to 10 requests per minute"
-            Write-Warning "Stopped processing the remaining result pages because we have exceeded this limit."
-            Start-Sleep -Seconds 61
+            Write-Warning "Waiting 60 seconds before processing the remaining result pages because we have exceeded this limit."
+            Start-Sleep -Seconds 60
         }
         $PageResponseContent = $PageResponse.Content | ConvertFrom-Json
 

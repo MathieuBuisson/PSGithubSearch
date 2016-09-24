@@ -3,10 +3,10 @@
 Function Find-GitHubRepository {
 <#
 .SYNOPSIS
-    Searches repositories on GitHub.com according to the specified search keyword(s) and parameters.
+    Searches repositories on GitHub.com based on the specified search keyword(s) and parameters.
     
 .DESCRIPTION
-    Uses the GitHub search API to find repositories on GitHub.com according to the specified search keyword(s) and parameters.
+    Uses the GitHub search API to find repositories on GitHub.com based on the specified search keyword(s) and parameters.
 
     This API's documentation is available here : https://developer.github.com/v3/search/
 
@@ -191,10 +191,10 @@ Function Find-GitHubRepository {
 Function Find-GitHubCode {
 <#
 .SYNOPSIS
-    Searches file contents on GitHub.com according to the specified search keyword(s) and parameters.
+    Searches file contents on GitHub.com based on the specified search keyword(s) and parameters.
     
 .DESCRIPTION
-    Uses the GitHub search API to find code in files on GitHub.com according to the specified search keyword(s) and parameters.
+    Uses the GitHub search API to find code in files on GitHub.com based on the specified search keyword(s) and parameters.
 
     This API's documentation is available here : https://developer.github.com/v3/search/
 
@@ -374,19 +374,66 @@ Function Find-GitHubCode {
 Function Find-GitHubIssue {
 <#
 .SYNOPSIS
+    Searches issues and pull requests on GitHub.com based on the specified search keyword(s) and parameters.
     
 .DESCRIPTION
+    Uses the GitHub search API to find issues and/or pull requests on GitHub.com based on the specified search keyword(s) and parameters.
+
+    This API's documentation is available here : https://developer.github.com/v3/search/
 
 .PARAMETER Keywords
+    To search issues and/or pull requests containing the specified keyword(s) in their title, body or comments.
 
-.PARAMETER User
-
-.PARAMETER Repo
-
-.PARAMETER Language
+.PARAMETER Type
+    To restrict the search to issues only or pull requests only.
+    By default, both are searched.
 
 .PARAMETER In
-        
+    To qualify which field is searched for the specified keyword(s). With this qualifier you can restrict the search to the title, body or comments of issues and pull requests.
+    By default, all these fields are searched for the specified keyword(s).
+
+.PARAMETER Author
+    To Limit searches to issues or pull requests created by a specific user.
+    If the value of this parameter doesn't match exactly with an existing GitHub user name, it throws an error.
+
+.PARAMETER Assignee
+    To Limit searches to issues or pull requests assigned to a specific user.
+    If the value of this parameter doesn't match exactly with an existing GitHub user name, it throws an error.
+
+.PARAMETER Mentions
+    To Limit searches to issues or pull requests in which a specific user is mentioned.
+    If the value of this parameter doesn't match exactly with an existing GitHub user name, it throws an error.
+
+.PARAMETER Commenter
+    To Limit searches to issues or pull requests in which a specific user commented.
+    If the value of this parameter doesn't match exactly with an existing GitHub user name, it throws an error.
+
+.PARAMETER Involves
+    To Limit searches to issues or pull requests which were either created by a specific user, assigned to that user, mention that user, or were commented on by that user.
+    If the value of this parameter doesn't match exactly with an existing GitHub user name, it throws an error.
+
+.PARAMETER State
+    Filter issues and/or pull requests based on whether they are open or closed.
+
+.PARAMETER Labels
+    Filters issues and/or pull requests based on their labels.
+    Limitation : this doesn't retrieve labels containing spaces or forward slashes.
+
+    If multiple labels are specified, only issues which have all the specified labels are returned.
+
+.PARAMETER No
+    To Limit searches to issues or pull requests which are missing certain metadata : label, milestone or assignee.
+
+.PARAMETER Language
+    Searches for issues and/or pull requests within repositories that match a certain language.
+
+.PARAMETER Repo
+    To Limit searches to issues and/or pull requests within a specific repository.
+
+.PARAMETER SortBy
+    To specify on which field the results should be sorted on : number of comments, creation date or last updated date.
+    By default, the results are sorted by best match.
+
 .EXAMPLE
 
 .NOTES
@@ -409,41 +456,209 @@ Function Find-GitHubIssue {
         [ValidateSet('title','body','comments')]
         [string]$In,
 
-        [Parameter(Position=1,ParameterSetName='Repo')]
-        [ValidatePattern('^[a-zA-Z]+/[a-zA-Z]+')]
-        [string]$Repo,
-
-        [Parameter(Position=2)]
-        [string]$Language,
+        [Parameter(Position=3)]
+        [string]$Author,
 
         [Parameter(Position=4)]
-        [ValidatePattern('^[\d<>][=\d]\d*$')]
-        [string]$SizeBytes,
+        [string]$Assignee,
 
         [Parameter(Position=5)]
-        [switch]$Fork,
+        [string]$Mentions,
 
         [Parameter(Position=6)]
-        [string]$FileName,
+        [string]$Commenter,
 
         [Parameter(Position=7)]
-        [string]$Extension,
+        [string]$Involves,
 
         [Parameter(Position=8)]
-        [switch]$SortByLastIndexed
+        [ValidateSet('open','closed')]
+        [string]$State,
+
+        [Parameter(Position=9)]
+        [string[]]$Labels,
+
+        [Parameter(Position=10)]
+        [ValidateSet('label','milestone','assignee')]
+        [string]$No,
+
+        [Parameter(Position=11)]
+        [string]$Language,
+
+        [Parameter(Position=12)]
+        [string]$Repo,
+
+        [Parameter(Position=13)]
+        [ValidateSet('comments','created','updated')]
+        [string]$SortBy
     )
 
     [string]$QueryString = 'q='
+    $EmptyQueryString = $True
+
     If ( $Keywords ) {
         $QueryString += ($Keywords -join '+')
+        $EmptyQueryString = $False
     }
     If ( $Type ) {
-        $QueryString += '+type:' + $Type
+        If ( $EmptyQueryString ) {
+            $QueryString += 'type:' + $Type
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+type:' + $Type
+        }
     }
     If ( $In ) {
-        $QueryString += '+in:' + $In
+        If ( $EmptyQueryString ) {
+            $QueryString += 'in:' + $In
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+in:' + $In
+        }
+    }
+    If ( $Author ) {
+        If ( $EmptyQueryString ) {
+            $QueryString += 'author:' + $Author
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+author:' + $Author
+        }
+    }
+    If ( $Assignee ) {
+        If ( $EmptyQueryString ) {
+            $QueryString += 'assignee:' + $Assignee
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+assignee:' + $Assignee
+        }
+    }
+    If ( $Mentions ) {
+        If ( $EmptyQueryString ) {
+            $QueryString += 'mentions:' + $Mentions
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+mentions:' + $Mentions
+        }
+    }
+    If ( $Commenter ) {
+        If ( $EmptyQueryString ) {
+            $QueryString += 'commenter:' + $Commenter
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+commenter:' + $Commenter
+        }
+    }
+    If ( $Involves ) {
+        If ( $EmptyQueryString ) {
+            $QueryString += 'involves:' + $Involves
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+involves:' + $Involves
+        }
+    }
+    If ( $State ) {
+        If ( $EmptyQueryString ) {
+            $QueryString += 'state:' + $State
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+state:' + $State
+        }
+    }
+    If ( $Labels ) {
+        If ( $EmptyQueryString ) {
+            $QueryString += ($Labels | ForEach-Object { 'label:' + $_ }) -join '+'
+            $EmptyQueryString = $False
+        }
+        Else {
+            Foreach ( $Label in $Labels ) { $QueryString += '+label:' + $Label }
+        }
+    }
+    If ( $No ) {
+        If ( $EmptyQueryString ) {
+            $QueryString += 'no:' + $No
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+no:' + $No
+        }
+    }
+    If ( $Language ) {
+        If ( $EmptyQueryString ) {
+            $QueryString += 'language:' + $Language
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+language:' + $Language
+        }
+    }
+    If ( $Repo ) {
+        If ( $EmptyQueryString ) {
+            $QueryString += 'repo:' + $Repo
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+repo:' + $Repo
+        }
+    }
+    If ( $SortBy ) {
+        $QueryString += "&sort=$SortBy"
     }
 
+    # Using the maximum number of results per page to limit the number of requests
+    $QueryString += '&per_page=100'
+
+    $UriBuilder = New-Object System.UriBuilder -ArgumentList 'https://api.github.com'
+    $UriBuilder.Path = 'search/issues' -as [uri]
+    $UriBuilder.Query = $QueryString
+
+    $BaseUri = $UriBuilder.Uri
+    Write-Verbose "Constructed base URI : $($BaseUri.AbsoluteUri)"
+
+    $Response = Invoke-WebRequest -Uri $BaseUri
+    If ( $Response.StatusCode -ne 200 ) {
+
+        Write-Warning "The status code was $($Response.StatusCode) : $($Response.StatusDescription)"
+    }
+    $NumberOfPages = Get-NumberofPages -SearchResult $Response
+    Write-Verbose "Number of pages for this search result : $($NumberOfPages)"
+
+    Foreach ( $PageNumber in 1..$NumberOfPages ) {
+
+        $ResultPageUri = $BaseUri.AbsoluteUri + "&page=$($PageNumber.ToString())"
+
+        Try {
+            $PageResponse  = Invoke-WebRequest -Uri $ResultPageUri -ErrorAction Stop
+        }
+        Catch {
+            Throw $_.Exception.Message
+        }
+
+        # The search API limits the number of requests to 10 requests per minute and per IP address (for unauthenticated requests)
+        # We might be subject to the limit on the number of requests if we run function multiple times in the last minute
+        $RemainingRequestsNumber = $PageResponse.Headers.'X-RateLimit-Remaining' -as [int]
+        Write-Verbose "Number of remaining API requests : $($RemainingRequestsNumber)."
+
+        If ( $RemainingRequestsNumber -le 1 ) {
+            Write-Warning "The search API limits the number of requests to 10 requests per minute"
+            Write-Warning "Waiting 60 seconds before processing the remaining result pages because we have exceeded this limit."
+            Start-Sleep -Seconds 60
+        }
+        $PageResponseContent = $PageResponse.Content | ConvertFrom-Json
+
+        Foreach ( $PageResult in $PageResponseContent.items ) {            
+
+            $PageResult.psobject.TypeNames.Insert(0,'PSGithubSearch.IssueOrPR')
+            $PageResult
+        }
+    }
 }
 
 Function Get-NumberofPages {

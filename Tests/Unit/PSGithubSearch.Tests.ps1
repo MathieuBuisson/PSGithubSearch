@@ -187,3 +187,116 @@ Describe 'Find-GitHubCode' {
         }
     }
 }
+Describe 'Find-GitHubIssue' {
+    
+    Context 'Keywords' {
+    
+        It 'All results have the specified keywords when multiple keywords are specified' {
+        
+            $KeywordTest = Find-GitHubIssue -Type issue -Keywords 'case','sensitive' -In title  -Repo 'Powershell/powershell'
+
+            Foreach ( $Result in $KeywordTest ) {
+                $Result.title | Should Match 'case'
+            }
+            Foreach ( $Result in $KeywordTest ) {
+                $Result.title | Should Match 'sensitive'
+            }
+        }
+    }
+
+    Context 'Search qualifiers behaviour' {
+<#       
+        It 'All results have the specified keyword in the field specified via the In parameter' {
+        
+            $InTest = Find-GitHubIssue -Type issue -Keywords 'crash','memory' -In body -Repo 'docker/docker' -State closed
+
+            Foreach ( $Result in $InTest ) {
+                $Result.body | Should Match 'crash'
+            }
+            Foreach ( $Result in $InTest ) {
+                $Result.body | Should Match 'memory'
+            }
+        }
+        It 'All issues were opened by the user specified via the Author parameter' {
+        
+            $AuthorTest = Find-GitHubIssue -Author 'jpsnover' -Repo 'powershell/powershell' -Type issue -State closed
+
+            Foreach ( $Result in $AuthorTest ) {
+                $Result.user.login | Should Be 'jpsnover'
+            }
+        }
+        It 'All results have the type specified via the Type parameter' {
+            
+            $TypeTest = Find-GitHubIssue -Type pr -Author 'mwrock' -Repo 'pester/pester'
+
+            Foreach ( $Result in $TypeTest ) {
+                $Result.pull_request | Should Not BeNullOrEmpty
+            }
+        }
+#>
+        It 'All results have the assignee specified via the Assignee parameter' {
+            
+            $AssigneeTest = Find-GitHubIssue -Type issue -Repo 'powershell/powershell' -Assignee 'lzybkr' -State closed
+
+            Foreach ( $Result in $AssigneeTest ) {
+                $Result.assignees.login -join ' ' | Should Match 'lzybkr'
+            }
+        }
+        It 'All results have the state specified via the State parameter' {
+            
+            $StateTest = Find-GitHubIssue -Type issue -Repo 'powershell/powershell' -Keywords 'case' -State closed
+
+            Foreach ( $Result in $StateTest ) {
+                $Result.state | Should Be 'closed'
+            }
+        }
+        It 'All results have the label specified via the Labels parameter' {
+            
+            $LabelTest = Find-GitHubIssue -Type issue -Repo 'powershell/powershell' -Labels 'Area-Engine' -State closed
+
+            Foreach ( $Result in $LabelTest ) {
+                $Result.labels.name -join ' ' | Should Match 'Area-Engine'
+            }
+        }
+        It 'All results have all the labels when multiple labels are specified via the Labels parameter' {
+            
+            $LabelsTest = Find-GitHubIssue -Type issue -Repo 'powershell/powershell' -Labels 'Area-Engine','Area-Language'
+            
+            Foreach ( $Result in $LabelsTest ) {
+                $Result.labels.name -join ' ' | Should Match 'Area-Engine'
+            }
+            Foreach ( $Result in $LabelsTest ) {
+                $Result.labels.name -join ' ' | Should Match 'Area-Language'
+            }
+        }
+    }
+}
+<#
+        [string]$No,
+        [string]$Repo
+
+    }
+    Context 'Sorting of search results' {
+
+        It 'When the $SortBy value is "stars", any result has more stars than the next one' {
+        
+            $SortByTest = Find-GitHubIssue -Keywords 'Pester' -SortBy stars -In name -Language 'PowerShell'
+
+            Foreach ( $ResultIndex in 0.. ($SortByTest.Count - 2) ) {
+                $SortByTest[$ResultIndex].stargazers_count + 1 |
+                Should BeGreaterThan $SortByTest[$ResultIndex + 1].stargazers_count
+            }
+
+        }
+        It "When the $SortBy value is 'forks', any result has more forks than the next one" {
+
+            $SortbyForksTest = Find-GitHubIssue -Keywords 'Pester' -SortBy forks -In name -Language 'PowerShell'
+
+            Foreach ( $ResultIndex in 0.. ($SortbyForksTest.Count - 2) ) {
+                $SortbyForksTest[$ResultIndex].forks + 1 |
+                Should BeGreaterThan $SortbyForksTest[$ResultIndex + 1].forks
+            }
+        }
+    }
+#>
+}

@@ -109,5 +109,71 @@
                 </ListEntries>
             </ListControl>
         </View>
+        <View>
+            <Name>PSGithubSearch.IssueOrPR</Name>
+            <ViewSelectedBy>
+                <TypeName>PSGithubSearch.IssueOrPR</TypeName>
+            </ViewSelectedBy>
+            <ListControl>
+                <ListEntries>
+                    <ListEntry>
+                        <ListItems>
+                            <ListItem>
+                                <Label>Title</Label>
+                                <PropertyName>title</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Number</Label>
+                                <PropertyName>number</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Id</Label>
+                                <PropertyName>id</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Url</Label>
+                                <PropertyName>html_url</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Opened by</Label>
+                                <ScriptBlock>$_.user.login</ScriptBlock>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Labels</Label>
+                                <ScriptBlock>$_.labels.name</ScriptBlock>
+                            </ListItem>
+                            <ListItem>
+                                <Label>State</Label>
+                                <PropertyName>state</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Assignees</Label>
+                                <ScriptBlock>$_.assignees.login</ScriptBlock>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Comments</Label>
+                                <PropertyName>comment</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Created</Label>
+                                <PropertyName>created_at</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Last Updated</Label>
+                                <PropertyName>updated_at</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Closed</Label>
+                                <PropertyName>closed_at</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Body</Label>
+                                <PropertyName>body</PropertyName>
+                            </ListItem>
+                        </ListItems>
+                    </ListEntry>
+                </ListEntries>
+            </ListControl>
+        </View>
     </ViewDefinitions>
 </Configuration>

@@ -154,7 +154,7 @@ Function Find-GitHubRepository {
 
         Write-Warning "The status code was $($Response.StatusCode) : $($Response.StatusDescription)"
     }
-    $NumberOfPages = Get-NumberofPages -SearchResult $Response
+    $NumberOfPages = Get-NumberofPage -SearchResult $Response
     Write-Verbose "Number of pages for this search result : $($NumberOfPages)"
 
     Foreach ( $PageNumber in 1..$NumberOfPages ) {
@@ -337,7 +337,7 @@ Function Find-GitHubCode {
 
         Write-Warning "The status code was $($Response.StatusCode) : $($Response.StatusDescription)"
     }
-    $NumberOfPages = Get-NumberofPages -SearchResult $Response
+    $NumberOfPages = Get-NumberofPage -SearchResult $Response
     Write-Verbose "Number of pages for this search result : $($NumberOfPages)"
 
     Foreach ( $PageNumber in 1..$NumberOfPages ) {
@@ -627,7 +627,7 @@ Function Find-GitHubIssue {
 
         Write-Warning "The status code was $($Response.StatusCode) : $($Response.StatusDescription)"
     }
-    $NumberOfPages = Get-NumberofPages -SearchResult $Response
+    $NumberOfPages = Get-NumberofPage -SearchResult $Response
     Write-Verbose "Number of pages for this search result : $($NumberOfPages)"
 
     Foreach ( $PageNumber in 1..$NumberOfPages ) {
@@ -661,13 +661,13 @@ Function Find-GitHubIssue {
     }
 }
 
-Function Get-NumberofPages {
+Function Get-NumberofPage {
 <#
 .SYNOPSIS
     Helper function to get the number of pages from a search result response.    
 #>
     [CmdletBinding()]
-    
+    [OutputType([System.Int32])]
     Param(
         [Parameter(Mandatory=$True,Position=0)]
         [Microsoft.PowerShell.Commands.HtmlWebResponseObject]$SearchResult

@@ -205,7 +205,7 @@ Describe 'Find-GitHubIssue' {
     }
 
     Context 'Search qualifiers behaviour' {
-<#       
+        
         It 'All results have the specified keyword in the field specified via the In parameter' {
         
             $InTest = Find-GitHubIssue -Type issue -Keywords 'crash','memory' -In body -Repo 'docker/docker' -State closed
@@ -233,7 +233,6 @@ Describe 'Find-GitHubIssue' {
                 $Result.pull_request | Should Not BeNullOrEmpty
             }
         }
-#>
         It 'All results have the assignee specified via the Assignee parameter' {
             
             $AssigneeTest = Find-GitHubIssue -Type issue -Repo 'powershell/powershell' -Assignee 'lzybkr' -State closed
@@ -269,18 +268,20 @@ Describe 'Find-GitHubIssue' {
                 $Result.labels.name -join ' ' | Should Match 'Area-Language'
             }
         }
-    }
-}
-<#
-        [string]$No,
-        [string]$Repo
+        It 'All results have the metadata field specified via the No parameter empty' {
+            
+            $NoTest = Find-GitHubIssue -Type issue -Repo 'powershell/powershell' -Labels 'Area-Test' -No assignee -State closed
 
+            Foreach ( $Result in $NoTest ) {
+                ($Result.assignees).Count | Should Be 0
+            }
+        }
     }
     Context 'Sorting of search results' {
-
-        It 'When the $SortBy value is "stars", any result has more stars than the next one' {
+<#
+        It 'When the $SortBy value is "comments", any result has more comments than the next one' {
         
-            $SortByTest = Find-GitHubIssue -Keywords 'Pester' -SortBy stars -In name -Language 'PowerShell'
+            $SortByTest = Find-GitHubIssue -Keywords 'Pester' -SortBy comments -In name -Language 'PowerShell'
 
             Foreach ( $ResultIndex in 0.. ($SortByTest.Count - 2) ) {
                 $SortByTest[$ResultIndex].stargazers_count + 1 |
@@ -288,15 +289,6 @@ Describe 'Find-GitHubIssue' {
             }
 
         }
-        It "When the $SortBy value is 'forks', any result has more forks than the next one" {
-
-            $SortbyForksTest = Find-GitHubIssue -Keywords 'Pester' -SortBy forks -In name -Language 'PowerShell'
-
-            Foreach ( $ResultIndex in 0.. ($SortbyForksTest.Count - 2) ) {
-                $SortbyForksTest[$ResultIndex].forks + 1 |
-                Should BeGreaterThan $SortbyForksTest[$ResultIndex + 1].forks
-            }
-        }
+    #>
     }
-#>
 }

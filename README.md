@@ -1,5 +1,8 @@
 # PSGithubSearch  
 
+[![Build status](https://ci.appveyor.com/api/projects/status/gg800e2jxt663q5i/branch/master?svg=true)](https://ci.appveyor.com/project/MathieuBuisson/psgithubsearch/branch/master)  
+
+
 PowerShell module to search for the following on GitHub :
 - Repositories
 - Code 

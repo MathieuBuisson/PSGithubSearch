@@ -315,13 +315,5 @@ Describe 'Find-GitHubUser' {
                 $Result.'Email Address' | Should Match 'Cookie'
             }
         }
-        It 'All the results are in the location specified via the Location parameter' {
-            
-            $LocationTest = Find-GithubUser -Type user -Language 'PowerShell' -Location 'Ireland'
-
-            Foreach ( $Result in $LocationTest ) {
-                $Result.Location | Should Match 'Ireland'
-            }
-        }
     }
 }

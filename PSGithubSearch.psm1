@@ -435,6 +435,10 @@ Function Find-GitHubIssue {
     By default, the results are sorted by best match.
 
 .EXAMPLE
+    $PowershellPR = Find-GitHubIssue -Type pr -Repo 'powershell/powershell'
+    $PowershellPR | Group-Object -Property { $_.User.login } | Sort-Object -Property Count -Descending | Select-Object -First 10
+
+    Gets the username of the 10 largest contributors to the PowerShell repository, in number of pull requests.
 
 .NOTES
     Author : Mathieu Buisson
@@ -656,6 +660,229 @@ Function Find-GitHubIssue {
         Foreach ( $PageResult in $PageResponseContent.items ) {            
 
             $PageResult.psobject.TypeNames.Insert(0,'PSGithubSearch.IssueOrPR')
+            $PageResult
+        }
+    }
+}
+
+Function Find-GithubUser {
+<#
+.SYNOPSIS
+    Searches users or organisations on GitHub.com based on the specified search keyword(s) and parameters.
+    
+.DESCRIPTION
+    Uses the GitHub search API to find users or organisations on GitHub.com based on the specified search keyword(s) and parameters.
+
+    This API's documentation is available here : https://developer.github.com/v3/search/
+
+    NOTE : The GitHub Search API limits each search to 1,000 results and the number of requests to 10 per minute.
+    
+.PARAMETER Keywords
+    One or more keywords to search.
+
+.PARAMETER Language
+    To search users who have repositories written in the specified language.
+
+.PARAMETER In
+    To qualify which field is searched. With this qualifier you can restrict the search to just the username (login), public email address (email) or full name (fullname).
+    If not specified, the default behaviour is to search in both the username, full name and public email address..
+
+.PARAMETER Type
+    To restrict the search to personal accounts or organization accounts.
+    By default, both are searched.
+
+.PARAMETER Repos
+    To filter the users or organization based on the number of repositories they have.
+
+.PARAMETER Location
+    To filter users or organizations based on the location indicated on their profile.
+
+.PARAMETER Followers
+    To filter users or organizations based on the number of followers they have.
+
+.PARAMETER SortBy
+    To specify on which field the results should be sorted on : number of followers, number of repositories, or when they joined GitHub.
+    By default, the results are sorted by best match.
+
+.EXAMPLE
+    Find-GithubUser -Type user -Language 'PowerShell' -Location 'Ireland' | Where-Object { $_.Hireable }
+
+    Gets information on GitHub users located in Ireland, who have at least one PowerShell repository and who have indicated on their profile that they are available for hire.
+
+.NOTES
+    Author : Mathieu Buisson
+    
+.LINK
+    https://github.com/MathieuBuisson/PSGithubSearch
+#>
+    [CmdletBinding()]
+    
+    Param(
+        [Parameter(Position=0)]
+        [string[]]$Keywords,
+
+        [Parameter(Position=1)]
+        [string]$Language,
+
+        [Parameter(Position=2)]
+        [ValidateSet('login','email','fullname')]
+        [string]$In,
+
+        [Parameter(Position=3)]
+        [ValidateSet('user','org')]
+        [string]$Type,
+
+        [Parameter(Position=4)]
+        [ValidatePattern('^[\d<>][=\d]\d*$')]
+        [string]$Repos,
+
+        [Parameter(Position=5)]
+        [string]$Location,
+
+        [Parameter(Position=6)]
+        [ValidatePattern('^[\d<>][=\d]\d*$')]
+        [string]$Followers,
+
+        [Parameter(Position=7)]
+        [ValidateSet('followers','repositories','joined')]
+        [string]$SortBy
+    )
+
+    [string]$QueryString = 'q='
+    $EmptyQueryString = $True
+
+    If ( $Keywords ) {
+        $QueryString += ($Keywords -join '+')
+        $EmptyQueryString = $False
+    }
+    If ( $Language ) {
+        If ( $EmptyQueryString ) {
+            $QueryString += 'language:' + $Language
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+language:' + $Language
+        }
+    }
+    If ( $In ) {
+        If ( $EmptyQueryString ) {
+            $QueryString += 'in:' + $In
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+in:' + $In
+        }
+    }
+    If ( $Type ) {
+        If ( $EmptyQueryString ) {
+            $QueryString += 'type:' + $Type
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+type:' + $Type
+        }
+    }
+    If ( $Repos ) {
+        If ( $EmptyQueryString ) {
+            $QueryString += 'repos:' + $Repos
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+repos:' + $Repos
+        }
+    }
+    If ( $Location ) {
+        If ( $EmptyQueryString ) {
+            $QueryString += 'location:' + $Location
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+location:' + $Location
+        }
+    }
+    If ( $Followers ) {
+        If ( $EmptyQueryString ) {
+            $QueryString += 'followers:' + $Followers
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+followers:' + $Followers
+        }
+    }
+    If ( $SortBy ) {
+        $QueryString += "&sort=$SortBy"
+    }
+
+    # Using the maximum number of results per page to limit the number of requests
+    $QueryString += '&per_page=100'
+
+    $UriBuilder = New-Object System.UriBuilder -ArgumentList 'https://api.github.com'
+    $UriBuilder.Path = 'search/users' -as [uri]
+    $UriBuilder.Query = $QueryString
+
+    $BaseUri = $UriBuilder.Uri
+    Write-Verbose "Constructed base URI : $($BaseUri.AbsoluteUri)"
+
+    $Response = Invoke-WebRequest -Uri $BaseUri
+    If ( $Response.StatusCode -ne 200 ) {
+
+        Write-Warning "The status code was $($Response.StatusCode) : $($Response.StatusDescription)"
+    }
+    $NumberOfPages = Get-NumberofPage -SearchResult $Response
+    Write-Verbose "Number of pages for this search result : $($NumberOfPages)"
+
+    Foreach ( $PageNumber in 1..$NumberOfPages ) {
+
+        $ResultPageUri = $BaseUri.AbsoluteUri + "&page=$($PageNumber.ToString())"
+
+        Try {
+            $PageResponse  = Invoke-WebRequest -Uri $ResultPageUri -ErrorAction Stop
+        }
+        Catch {
+            Throw $_.Exception.Message
+        }
+
+        # The search API limits the number of requests to 10 requests per minute and per IP address (for unauthenticated requests)
+        # We might be subject to the limit on the number of requests if we run function multiple times in the last minute
+        $RemainingRequestsNumber = $PageResponse.Headers.'X-RateLimit-Remaining' -as [int]
+        Write-Verbose "Number of remaining API requests : $($RemainingRequestsNumber)."
+
+        If ( $RemainingRequestsNumber -le 1 ) {
+            Write-Warning "The search API limits the number of requests to 10 requests per minute"
+            Write-Warning "Waiting 60 seconds before processing the remaining result pages because we have exceeded this limit."
+            Start-Sleep -Seconds 60
+        }
+        $PageResponseContent = $PageResponse.Content | ConvertFrom-Json
+
+        Foreach ( $PageResult in $PageResponseContent.items ) {
+                       
+            $UserDetailsResponse = Invoke-WebRequest -Uri $PageResult.url
+
+            If ( ($UserDetailsResponse.Headers.'X-RateLimit-Remaining' -as [int]) -le 1 ) {
+                Write-Warning "The search API limits the number of requests to 10 requests per minute"
+                Write-Warning "Waiting 60 seconds before processing the remaining result pages because we have exceeded this limit."
+                Start-Sleep -Seconds 60
+            }
+            $UserDetails = $UserDetailsResponse.Content | ConvertFrom-Json
+
+            $UserProperties = [ordered]@{
+                            'Full Name' = $UserDetails.name
+                            'Company' = $UserDetails.company
+                            'Blog' = $UserDetails.blog
+                            'Location' = $UserDetails.location
+                            'Email Address' = $UserDetails.email
+                            'Hireable' = $UserDetails.hireable
+                            'Bio' = $UserDetails.bio
+                            'Repos' = $UserDetails.public_repos
+                            'Gists' = $UserDetails.public_gists
+                            'Followers' = $UserDetails.followers
+                            'Following' = $UserDetails.following
+                            'Joined' = $UserDetails.created_at
+                            }
+
+            Add-Member -InputObject $PageResult -NotePropertyMembers $UserProperties -Force
+
+            $PageResult.psobject.TypeNames.Insert(0,'PSGithubSearch.User')
             $PageResult
         }
     }

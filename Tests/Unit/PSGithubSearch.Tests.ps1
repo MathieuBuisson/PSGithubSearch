@@ -1,5 +1,5 @@
 $ModuleName = 'PSGithubSearch'
-Import-Module "$($PSScriptRoot)\..\..\$($ModuleName).psm1" -Force
+Import-Module "$($PSScriptRoot)\..\..\$($ModuleName).psd1" -Force
 
 Describe 'Find-GitHubRepository' {
     
@@ -203,7 +203,7 @@ Describe 'Find-GitHubIssue' {
             }
         }
     }
-
+    
     Context 'Search qualifiers behaviour' {
         
         It 'All results have the specified keyword in the field specified via the In parameter' {
@@ -277,18 +277,51 @@ Describe 'Find-GitHubIssue' {
             }
         }
     }
+    
     Context 'Sorting of search results' {
-<#
-        It 'When the $SortBy value is "comments", any result has more comments than the next one' {
+        It 'When the SortBy value is "comments", any result has more comments than the next one' {
         
-            $SortByTest = Find-GitHubIssue -Keywords 'Pester' -SortBy comments -In name -Language 'PowerShell'
+            $SortByTest = Find-GitHubIssue -Type issue -Repo 'powershell/powershell' -Labels 'Area-Language' -SortBy comments
 
             Foreach ( $ResultIndex in 0.. ($SortByTest.Count - 2) ) {
-                $SortByTest[$ResultIndex].stargazers_count + 1 |
-                Should BeGreaterThan $SortByTest[$ResultIndex + 1].stargazers_count
+                $SortByTest[$ResultIndex].comments + 1 |
+                Should BeGreaterThan $SortByTest[$ResultIndex + 1].comments
             }
-
         }
-    #>
+    }
+}
+
+Describe 'Find-GitHubUser' {
+    
+    Context 'Keywords' {
+    
+        It 'All results have the specified keywords' {
+        
+            $KeywordTest = Find-GithubUser -Type user -Keywords 'Rambling' -In login -Repos '>7'
+
+            Foreach ( $Result in $KeywordTest ) {
+                $Result.login | Should Match 'Rambling'
+            }
+        }
+    }
+    
+    Context 'Search qualifiers behaviour' {
+        
+        It 'All results have the specified keyword in the field specified via the In parameter' {
+        
+            $InTest = Find-GithubUser -Type user -Keywords 'Cookie' -In email
+
+            Foreach ( $Result in $InTest ) {
+                $Result.'Email Address' | Should Match 'Cookie'
+            }
+        }
+        It 'All the results are in the location specified via the Location parameter' {
+            
+            $LocationTest = Find-GithubUser -Type user -Language 'PowerShell' -Location 'Ireland'
+
+            Foreach ( $Result in $LocationTest ) {
+                $Result.Location | Should Match 'Ireland'
+            }
+        }
     }
 }

@@ -175,5 +175,79 @@
                 </ListEntries>
             </ListControl>
         </View>
+        <View>
+            <Name>PSGithubSearch.User</Name>
+            <ViewSelectedBy>
+                <TypeName>PSGithubSearch.User</TypeName>
+            </ViewSelectedBy>
+            <ListControl>
+                <ListEntries>
+                    <ListEntry>
+                        <ListItems>
+                            <ListItem>
+                                <Label>UserName</Label>
+                                <PropertyName>login</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Full Name</Label>
+                                <PropertyName>Full Name</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Type</Label>
+                                <PropertyName>type</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Url</Label>
+                                <PropertyName>html_url</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Company</Label>
+                                <PropertyName>Company</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Blog</Label>
+                                <PropertyName>Blog</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Location</Label>
+                                <PropertyName>Location</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Email Address</Label>
+                                <PropertyName>Email Address</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Hireable</Label>
+                                <PropertyName>Hireable</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Bio</Label>
+                                <PropertyName>Bio</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Repos</Label>
+                                <PropertyName>Repos</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Gists</Label>
+                                <PropertyName>Gists</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Followers</Label>
+                                <PropertyName>Followers</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Following</Label>
+                                <PropertyName>Following</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Joined</Label>
+                                <PropertyName>Joined</PropertyName>
+                            </ListItem>
+                        </ListItems>
+                    </ListEntry>
+                </ListEntries>
+            </ListControl>
+        </View>
     </ViewDefinitions>
 </Configuration>

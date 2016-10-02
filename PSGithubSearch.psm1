@@ -668,7 +668,7 @@ Function Find-GitHubIssue {
 Function Find-GithubUser {
 <#
 .SYNOPSIS
-    Searches users or organisations on GitHub.com based on the specified search keyword(s) and parameters.
+    Searches users and/or organisations on GitHub.com based on the specified search keyword(s) and parameters.
     
 .DESCRIPTION
     Uses the GitHub search API to find users or organisations on GitHub.com based on the specified search keyword(s) and parameters.

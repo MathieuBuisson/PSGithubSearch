@@ -1,0 +1,98 @@
+{
+    "Invoke-WebRequest": [
+        {
+            "MathieuBuissonPowerShell": {
+                "StatusCode": 200,
+                "StatusDescription": "OK",
+                "Headers": {
+                    "Link": false,
+                    "X-RateLimit-Remaining": "9"
+                },
+                "Content": {
+                    "items": [
+                        {
+                            "name": "Powershell-VMware",
+                            "owner": {
+                                "login": "MathieuBuisson"
+                            },
+                            "description": "Powershell or PowerCLI modules for VMware administration/troubleshooting tasks",
+                            "stargazers_count": 36,
+                            "language": "PowerShell",
+                            "forks_count": 13,
+                            "forks": 13
+                        },
+                        {
+                            "name": "PSCodeHealth",
+                            "owner": {
+                                "login": "MathieuBuisson"
+                            },
+                            "description": "PowerShell module gathering PowerShell code quality and maintainability metrics",
+                            "stargazers_count": 6,
+                            "language": "PowerShell",
+                            "forks_count": 0,
+                            "forks": 0
+                        },
+                        {
+                            "name": "PSGithubSearch",
+                            "owner": {
+                                "login": "MathieuBuisson"
+                            },
+                            "description": "Powershell or PowerCLI modules for VMware administration/troubleshooting tasks",
+                            "stargazers_count": 4,
+                            "language": "PowerShell",
+                            "forks_count": 3,
+                            "forks": 3
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "PowerShellInName": {
+                "StatusCode": 200,
+                "StatusDescription": "OK",
+                "Headers": {
+                    "Link": false,
+                    "X-RateLimit-Remaining": "9"
+                },
+                "Content": {
+                    "items": [
+                        {
+                            "name": "Powershell-VMware",
+                            "owner": {
+                                "login": "MathieuBuisson"
+                            },
+                            "description": "Powershell or PowerCLI modules for VMware administration/troubleshooting tasks",
+                            "stargazers_count": 36,
+                            "language": "PowerShell",
+                            "forks_count": 13,
+                            "forks": 13
+                        },
+                        {
+                            "name": "Powershell-Utility",
+                            "owner": {
+                                "login": "MathieuBuisson"
+                            },
+                            "description": "Various generic tools (scripts or modules) which can be reused from other scripts or modules",
+                            "stargazers_count": 7,
+                            "language": "PowerShell",
+                            "forks_count": 3,
+                            "forks": 3
+                        },
+                        {
+                            "name": "PowerShell-DevOps",
+                            "owner": {
+                                "login": "MathieuBuisson"
+                            },
+                            "description": "PowerShell scripts or modules for purposes related to DevOps practices",
+                            "stargazers_count": 5,
+                            "language": "PowerShell",
+                            "forks_count": 1,
+                            "forks": 1
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

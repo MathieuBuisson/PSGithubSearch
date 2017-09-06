@@ -897,7 +897,7 @@ Function Get-NumberofPage {
     [OutputType([System.Int32])]
     Param(
         [Parameter(Mandatory=$True,Position=0)]
-        [Microsoft.PowerShell.Commands.HtmlWebResponseObject]$SearchResult
+        [PSObject]$SearchResult
     )
 
     $PaginationInfo = $SearchResult.Headers.Link

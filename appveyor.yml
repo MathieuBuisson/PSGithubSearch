@@ -5,9 +5,9 @@ image: Visual Studio 2017
 install:
   - ps: Write-Host "Build version :`  $env:APPVEYOR_BUILD_VERSION"
   - ps: Write-Host "Branch        :`  $env:APPVEYOR_REPO_BRANCH"
-  - ps: Install-Module Pester -Scope CurrentUser -SkipPublisherCheck
-  - ps: Install-Module PsScriptAnalyzer -Scope CurrentUser -SkipPublisherCheck
-  - ps: Install-Module PSCodeHealth -Scope CurrentUser -SkipPublisherCheck
+  - ps: Install-Module Pester -Scope CurrentUser -SkipPublisherCheck -Force
+  - ps: Install-Module PsScriptAnalyzer -Scope CurrentUser -SkipPublisherCheck -Force
+  - ps: Install-Module PSCodeHealth -Scope CurrentUser -SkipPublisherCheck -Force
   
 build: false
 

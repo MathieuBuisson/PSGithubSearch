@@ -1,10 +1,10 @@
 $ModuleName = 'PSGithubSearch'
-Import-Module "$($PSScriptRoot)\..\..\$($ModuleName).psd1" -Force
+Import-Module "$PSScriptRoot\..\..\$ModuleName\$ModuleName.psd1" -Force
 
 Describe 'Find-GitHubRepository' {
     InModuleScope $ModuleName {
         
-        $Mocks = ConvertFrom-Json (Get-Content -Path "$($PSScriptRoot)\..\TestData\MockObjects.json" -Raw )
+        $Mocks = ConvertFrom-Json (Get-Content -Path "$PSScriptRoot\..\TestData\MockObjects.json" -Raw )
         Mock ConvertFrom-Json { return $InputObject }
                 
         Context 'Keywords' {
@@ -21,9 +21,7 @@ Describe 'Find-GitHubRepository' {
             }
         }
         Context 'Search qualifiers behaviour' {
-            Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.MathieuBuissonPowerShell }
-            Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.PowerShellInName } -ParameterFilter { $In -eq 'name' }
-       
+            
             It 'All results have the specified language' {
             
                 $LanguageTest = Find-GitHubRepository -Keywords 'script' -Language 'PowerShell' -User 'MathieuBuisson'
@@ -33,40 +31,32 @@ Describe 'Find-GitHubRepository' {
                 }
             }
             It 'All results have the specified keyword in the field specified via the In parameter' {
-            
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.PowerShellInName }
                 $InTest = Find-GitHubRepository -Keywords 'PowerShell-' -In 'name' -User 'MathieuBuisson'
 
                 Foreach ( $Result in $InTest ) {
                     $Result.name | Should Match 'PowerShell-'
                 }
-            }<#
+            }
             It 'All results match the size filter (greater than) specified via the SizeKB parameter' {
-            
-                $SizeKBTest = Find-GitHubRepository -Keywords 'PowerShell' -User 'MathieuBuisson' -SizeKB '>59'
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.SizeGreaterThan100 }
+                $SizeKBTest = Find-GitHubRepository -Keywords 'PowerShell' -User 'MathieuBuisson' -SizeKB '>100'
 
                 Foreach ( $Result in $SizeKBTest ) {
-                    $Result.size | Should BeGreaterThan 59
-                }
-            }
-            It 'All results match the size filter (less than) specified via the SizeKB parameter' {
-            
-                $SizeKBTest_LessThan = Find-GitHubRepository -Keywords 'PowerShell' -User 'MathieuBuisson' -SizeKB '<58'
-
-                Foreach ( $Result in $SizeKBTest_LessThan ) {
-                    $Result.size | Should BeLessThan 58
+                    $Result.size | Should BeGreaterThan 100
                 }
             }
             It 'All results are NOT forks if the Fork parameter is not used' {
-            
-                $NoFork = Find-GitHubRepository -Keywords 'PowerShell-Docs' -In name -SizeKB '>400'
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.NoFork }
+                $NoFork = Find-GitHubRepository -Keywords 'Any' -In name
 
                 Foreach ( $Result in $NoFork ) {
                     $Result.fork | Should Be $False
                 }
             }
             It 'All results are forks if the Fork parameter has the value "only"' {
-            
-                $OnlyFork = Find-GitHubRepository -Keywords 'PowerShell-Docs' -In name -SizeKB '>400' -Fork only
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.ForksOnly }
+                $OnlyFork = Find-GitHubRepository -Keywords 'Any' -In name -Fork 'only'
 
                 Foreach ( $Result in $OnlyFork ) {
                     $Result.fork | Should Be $True
@@ -74,216 +64,224 @@ Describe 'Find-GitHubRepository' {
             }
             It 'All results have the owner specified via the User parameter' {
             
-                $UserTest = Find-GitHubRepository -Keywords 'script' -User 'MathieuBuisson'
+                $UserTest = Find-GitHubRepository -Keywords 'PS' -User 'MathieuBuisson'
 
                 Foreach ( $Result in $UserTest ) {
                     $Result.owner.login | Should match 'MathieuBuisson'
                 }
             }
             It 'All results match the stars filter specified via the Stars parameter' {
-            
-                $StarsTest = Find-GitHubRepository -Keywords 'script' -User 'MathieuBuisson' -Stars '>=1'
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.MoreThan20Stars }
+                $StarsTest = Find-GitHubRepository -Keywords 'script' -User 'MathieuBuisson' -Stars '>20'
 
                 Foreach ( $Result in $StarsTest ) {
-                    $Result.stargazers_count | Should BeGreaterThan 0
+                    $Result.stargazers_count | Should BeGreaterThan 20
                 }
-            }#>
+            }
         }
-        <#
         Context 'Sorting of search results' {
-
-            It 'When the $SortBy value is "stars", any result has more stars than the next one' {
             
-                $SortByTest = Find-GitHubRepository -Keywords 'Pester' -SortBy stars -In name -Language 'PowerShell'
-
-                Foreach ( $ResultIndex in 0.. ($SortByTest.Count - 2) ) {
-                    $SortByTest[$ResultIndex].stargazers_count + 1 |
-                    Should BeGreaterThan $SortByTest[$ResultIndex + 1].stargazers_count
-                }
+            It 'When the $SortBy value is "stars", any result has more stars than the next one' {
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.MoreThan20Stars }
+                Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.MoreThan20Stars.Content }
+                
+                $SortByTest = Find-GitHubRepository -Keywords 'Any' -SortBy 'stars'
+                $SortByTest[0].stargazers_count | Should BeGreaterThan $SortByTest[1].stargazers_count
 
             }
             It "When the $SortBy value is 'forks', any result has more forks than the next one" {
-
-                $SortbyForksTest = Find-GitHubRepository -Keywords 'Pester' -SortBy forks -In name -Language 'PowerShell'
-
-                Foreach ( $ResultIndex in 0.. ($SortbyForksTest.Count - 2) ) {
-                    $SortbyForksTest[$ResultIndex].forks + 1 |
-                    Should BeGreaterThan $SortbyForksTest[$ResultIndex + 1].forks
-                }
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.SortByForks }
+                Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.SortByForks.Content }
+                
+                $SortbyForks = Find-GitHubRepository -Keywords 'Any' -SortBy forks
+                $SortbyForks[0].forks | Should BeGreaterThan $SortbyForks[1].forks
             }
         }
     }
 }
-
 Describe 'Find-GitHubCode' {
-    
-    Context 'Defaut parameter set using positional parameters' {
+    InModuleScope $ModuleName {
+
+        $Mocks = ConvertFrom-Json (Get-Content -Path "$PSScriptRoot\..\TestData\MockObjects.json" -Raw )
         
-        It 'Should use the defaut parameter set and bind the second argument to the User parameter' {
+        Context 'Defaut parameter set using positional parameters' {
             
-            $ParamSetTest = Find-GitHubCode 'SupportsShouldProcess' 'MathieuBuisson'
+            It 'Should use the defaut parameter set and bind the second argument to the User parameter' {
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.ParameterSet }
+                Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.ParameterSet.Content }
+                $ParamSetTest = Find-GitHubCode 'SupportsShouldProcess' 'MathieuBuisson'
 
-            Foreach ( $Result in $ParamSetTest ) {
-                $Result.repository.owner.login | Should Be 'MathieuBuisson'
+                Foreach ( $Result in $ParamSetTest ) {
+                    $Result.repository.owner.login | Should Be 'MathieuBuisson'
+                }
             }
         }
-    }
-    Context 'Keywords' {
-        
-        It 'All file results have the specified keyword in their path' {
-
-            $KeywordTest = Find-GitHubCode -Keywords 'Deployment' -User 'MathieuBuisson' -In path
-
-            Foreach ( $Result in $KeywordTest ) {
-                $Result.path | Should Match 'Deployment'
-            }
-        }
-        It 'All results have the specified keywords when multiple keywords are specified' {
-        
-            $KeywordTest2 = Find-GitHubCode -Keywords 'Deployment','Validation' -User 'MathieuBuisson' -In path
-
-            Foreach ( $Result in $KeywordTest2 ) {
-                $Result.path | Should Match 'Deployment'
-            }
-            Foreach ( $Result in $KeywordTest2 ) {
-                $Result.path | Should Match 'Validation'
-            }
-        }
-    }
-    Context 'Search qualifiers behaviour' {
-
-        It 'All results are from the repository specified via the Repo parameter' {
-
-            $RepoTest = Find-GitHubCode -Keywords 'CmdletBinding()' -Repo 'MathieuBuisson/DeploymentReadinessChecker'
-
-            Foreach ( $Result in $RepoTest ) {
-                $Result.repository.full_name | Should Be 'MathieuBuisson/DeploymentReadinessChecker'
-            }
-
-        }
-        It 'All file results match the size filter (less than) specified via the SizeBytes parameter' {
+        Context 'Keywords' {
             
-            $SizeTest = Find-GitHubCode -Keywords 'socket' -Language 'go' -User 'googollee' -SizeBytes '<150'
-            $FileDetails = Invoke-RestMethod -Uri $SizeTest[0].url
-            $FileDetails.size | Should BeLessThan 150
-        }
-        It 'All file results have the string specified via the FileName parameter in their name' {
-            
-            $FileNameTest = Find-GitHubCode -Keywords 'Computer' -User 'MathieuBuisson' -FileName 'Tests'
+            It 'All file results have the specified keyword in their path' {
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.DeploymentInPath }
+                Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.DeploymentInPath.Content }
+                $KeywordTest = Find-GitHubCode -Keywords 'Deployment' -User 'MathieuBuisson' -In path
 
-            Foreach ( $Result in $FileNameTest ) {
-                $Result.name | Should Match 'Tests'
+                Foreach ( $Result in $KeywordTest ) {
+                    $Result.path | Should Match 'Deployment'
+                }
+            }
+            It 'All results have the specified keywords when multiple keywords are specified' {
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.MultiKeywords }
+                Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.MultiKeywords.Content }
+                $MultiKeyword = Find-GitHubCode -Keywords 'Deployment','Validation' -In path
+
+                Foreach ( $Result in $MultiKeyword ) {
+                    $Result.path | Should Match 'Deployment'
+                }
+                Foreach ( $Result in $MultiKeyword ) {
+                    $Result.path | Should Match 'Validation'
+                }
             }
         }
-        It 'All file results have the extension specified via the Extension parameter' {
-            
-            $ExtensionTest = Find-GitHubCode -Keywords 'ComputerName' -User 'MathieuBuisson' -Extension 'psm1'
-            
-            Foreach ( $Result in $ExtensionTest ) {
-                $Result.name | Should Match '\.psm1$'
+        Context 'Search qualifiers behaviour' {
+
+            It 'All results are from the repository specified via the Repo parameter' {
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.MultiKeywords }
+                Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.MultiKeywords.Content }
+                $RepoTest = Find-GitHubCode -Keywords 'Any' -Repo 'MathieuBuisson/DeploymentReadinessChecker'
+
+                Foreach ( $Result in $RepoTest ) {
+                    $Result.repository.full_name | Should Be 'MathieuBuisson/DeploymentReadinessChecker'
+                }
+
+            }
+            It 'All file results have the string specified via the FileName parameter in their name' {
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.MultiKeywords }
+                Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.MultiKeywords.Content }
+                $FileNameTest = Find-GitHubCode -Keywords 'Any' -User 'MathieuBuisson' -FileName 'Tests'
+
+                Foreach ( $Result in $FileNameTest ) {
+                    $Result.name | Should Match 'Tests'
+                }
+            }
+            It 'All file results have the extension specified via the Extension parameter' {
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.MultiKeywords }
+                Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.MultiKeywords.Content }
+                $ExtensionTest = Find-GitHubCode -Keywords 'Any' -User 'MathieuBuisson' -Extension 'ps1'
+                
+                Foreach ( $Result in $ExtensionTest ) {
+                    $Result.name | Should Match '\.ps1$'
+                }
             }
         }
     }
 }
 Describe 'Find-GitHubIssue' {
-    
-    Context 'Keywords' {
-    
-        It 'All results have the specified keywords when multiple keywords are specified' {
+    InModuleScope $ModuleName {
         
-            $KeywordTest = Find-GitHubIssue -Type issue -Keywords 'case','sensitive' -In title  -Repo 'Powershell/powershell'
-
-            Foreach ( $Result in $KeywordTest ) {
-                $Result.title | Should Match 'case'
-            }
-            Foreach ( $Result in $KeywordTest ) {
-                $Result.title | Should Match 'sensitive'
-            }
-        }
-    }
-    
-    Context 'Search qualifiers behaviour' {
+        $Mocks = ConvertFrom-Json (Get-Content -Path "$PSScriptRoot\..\TestData\MockObjects.json" -Raw )
         
-        It 'All results have the specified keyword in the field specified via the In parameter' {
+        Context 'Keywords' {
+            
+            It 'All results have the specified keywords when multiple keywords are specified' {
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.IssueKeywords }
+                Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.IssueKeywords.Content }
+                $KeywordTest = Find-GitHubIssue -Type issue -Keywords 'case','sensitive' -In title
+
+                Foreach ( $Result in $KeywordTest ) {
+                    $Result.title | Should Match 'case'
+                }
+                Foreach ( $Result in $KeywordTest ) {
+                    $Result.title | Should Match 'sensitive'
+                }
+            }
+        }    
+        Context 'Search qualifiers behaviour' {
+            
+            It 'All results have the specified keyword in the field specified via the In parameter' {
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.IssueKeywords }
+                Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.IssueKeywords.Content }
+                $InTest = Find-GitHubIssue -Type issue -Keywords 'error','cannot' -In body
+
+                Foreach ( $Result in $InTest ) {
+                    $Result.body | Should Match 'error'
+                }
+                Foreach ( $Result in $InTest ) {
+                    $Result.body | Should Match 'cannot'
+                }
+            }
+            It 'All issues were opened by the user specified via the Author parameter' {
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.AuthorSnover }
+                Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.AuthorSnover.Content }
+                $AuthorTest = Find-GitHubIssue -Author 'jpsnover' -Type issue
+
+                Foreach ( $Result in $AuthorTest ) {
+                    $Result.user.login | Should Be 'jpsnover'
+                }
+            }
+            It 'All results have the type specified via the Type parameter' {
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.TypePR }
+                Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.TypePR.Content }
+                $TypeTest = Find-GitHubIssue -Type pr -Author 'mwrock'
+
+                Foreach ( $Result in $TypeTest ) {
+                    $Result.pull_request | Should Not BeNullOrEmpty
+                }
+            }
+            It 'All results have the assignee specified via the Assignee parameter' {
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.AuthorSnover }
+                Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.AuthorSnover.Content }
+                $AssigneeTest = Find-GitHubIssue -Type issue -Assignee 'lzybkr'
+
+                Foreach ( $Result in $AssigneeTest ) {
+                    $Result.assignees.login -join ' ' | Should Match 'lzybkr'
+                }
+            }
+            It 'All results have the state specified via the State parameter' {
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.AuthorSnover }
+                Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.AuthorSnover.Content }
+                $StateTest = Find-GitHubIssue -Type issue -Assignee 'lzybkr'
+
+                Foreach ( $Result in $StateTest ) {
+                    $Result.state | Should Be 'closed'
+                }
+            }
+            It 'All results have the label specified via the Labels parameter' {
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.AuthorSnover }
+                Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.AuthorSnover.Content }
+                $LabelTest = Find-GitHubIssue -Type issue -Labels 'Area-Engine'
+
+                Foreach ( $Result in $LabelTest ) {
+                    $Result.labels.name -join ' ' | Should Match 'Area-Engine'
+                }
+            }<#
+            It 'All results have all the labels when multiple labels are specified via the Labels parameter' {
+                
+                $LabelsTest = Find-GitHubIssue -Type issue -Repo 'powershell/powershell' -Labels 'Area-Engine','Area-Language'
+                
+                Foreach ( $Result in $LabelsTest ) {
+                    $Result.labels.name -join ' ' | Should Match 'Area-Engine'
+                }
+                Foreach ( $Result in $LabelsTest ) {
+                    $Result.labels.name -join ' ' | Should Match 'Area-Language'
+                }
+            }
+            It 'All results have the metadata field specified via the No parameter empty' {
+                
+                $NoTest = Find-GitHubIssue -Type issue -Repo 'powershell/powershell' -Labels 'Area-Test' -No assignee -State closed
+
+                Foreach ( $Result in $NoTest ) {
+                    ($Result.assignees).Count | Should Be 0
+                }
+            }
+        }
         
-            $InTest = Find-GitHubIssue -Type issue -Keywords 'crash','memory' -In body -Repo 'docker/docker' -State closed
-
-            Foreach ( $Result in $InTest ) {
-                $Result.body | Should Match 'crash'
-            }
-            Foreach ( $Result in $InTest ) {
-                $Result.body | Should Match 'memory'
-            }
-        }
-        It 'All issues were opened by the user specified via the Author parameter' {
-        
-            $AuthorTest = Find-GitHubIssue -Author 'jpsnover' -Repo 'powershell/powershell' -Type issue -State closed
-
-            Foreach ( $Result in $AuthorTest ) {
-                $Result.user.login | Should Be 'jpsnover'
-            }
-        }
-        It 'All results have the type specified via the Type parameter' {
+        Context 'Sorting of search results' {
+            It 'When the SortBy value is "comments", any result has more comments than the next one' {
             
-            $TypeTest = Find-GitHubIssue -Type pr -Author 'mwrock' -Repo 'pester/pester'
+                $SortByTest = Find-GitHubIssue -Type issue -Repo 'powershell/powershell' -Labels 'Area-Language' -SortBy comments
 
-            Foreach ( $Result in $TypeTest ) {
-                $Result.pull_request | Should Not BeNullOrEmpty
-            }
-        }
-        It 'All results have the assignee specified via the Assignee parameter' {
-            
-            $AssigneeTest = Find-GitHubIssue -Type issue -Repo 'powershell/powershell' -Assignee 'lzybkr' -State closed
-
-            Foreach ( $Result in $AssigneeTest ) {
-                $Result.assignees.login -join ' ' | Should Match 'lzybkr'
-            }
-        }
-        It 'All results have the state specified via the State parameter' {
-            
-            $StateTest = Find-GitHubIssue -Type issue -Repo 'powershell/powershell' -Keywords 'case' -State closed
-
-            Foreach ( $Result in $StateTest ) {
-                $Result.state | Should Be 'closed'
-            }
-        }
-        It 'All results have the label specified via the Labels parameter' {
-            
-            $LabelTest = Find-GitHubIssue -Type issue -Repo 'powershell/powershell' -Labels 'Area-Engine' -State closed
-
-            Foreach ( $Result in $LabelTest ) {
-                $Result.labels.name -join ' ' | Should Match 'Area-Engine'
-            }
-        }
-        It 'All results have all the labels when multiple labels are specified via the Labels parameter' {
-            
-            $LabelsTest = Find-GitHubIssue -Type issue -Repo 'powershell/powershell' -Labels 'Area-Engine','Area-Language'
-            
-            Foreach ( $Result in $LabelsTest ) {
-                $Result.labels.name -join ' ' | Should Match 'Area-Engine'
-            }
-            Foreach ( $Result in $LabelsTest ) {
-                $Result.labels.name -join ' ' | Should Match 'Area-Language'
-            }
-        }
-        It 'All results have the metadata field specified via the No parameter empty' {
-            
-            $NoTest = Find-GitHubIssue -Type issue -Repo 'powershell/powershell' -Labels 'Area-Test' -No assignee -State closed
-
-            Foreach ( $Result in $NoTest ) {
-                ($Result.assignees).Count | Should Be 0
-            }
-        }
-    }
-    
-    Context 'Sorting of search results' {
-        It 'When the SortBy value is "comments", any result has more comments than the next one' {
-        
-            $SortByTest = Find-GitHubIssue -Type issue -Repo 'powershell/powershell' -Labels 'Area-Language' -SortBy comments
-
-            Foreach ( $ResultIndex in 0.. ($SortByTest.Count - 2) ) {
-                $SortByTest[$ResultIndex].comments + 1 |
-                Should BeGreaterThan $SortByTest[$ResultIndex + 1].comments
+                Foreach ( $ResultIndex in 0.. ($SortByTest.Count - 2) ) {
+                    $SortByTest[$ResultIndex].comments + 1 |
+                    Should BeGreaterThan $SortByTest[$ResultIndex + 1].comments
+                }
             }
         }
     }
@@ -312,6 +310,9 @@ Describe 'Find-GitHubUser' {
             Foreach ( $Result in $InTest ) {
                 $Result.'Email Address' | Should Match 'Cookie'
             }
-        }#>
+        }
     }
+}#>
+    }
+}
 }

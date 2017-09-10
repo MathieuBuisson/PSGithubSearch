@@ -451,6 +451,62 @@
                     ]
                 }
             }
+        },
+        {
+            "NoAssignee": {
+                "StatusCode": 200,
+                "StatusDescription": "OK",
+                "Headers": {
+                    "Link": false,
+                    "X-RateLimit-Remaining": "9"
+                },
+                "Content": {
+                    "items": [
+                        {
+                            "title": "WindowsInstaller.Tests.ps1 failed on debian",
+                            "body": "Warning: This site requires the use of scripts, which your browser does not currently allow.See how to enable scripts",
+                            "user": {
+                                "login": "JamesWTruher"
+                            },
+                            "assignees": null,
+                            "comments": 3
+                        },
+                        {
+                            "title": "Building on macOS fails as of 22 Jul 2017",
+                            "body": "Error : The term 'Register-PackageSource' is not recognized as the name of a cmdlet, function, script file, or operable program.",
+                            "user": {
+                                "login": "mklement0"
+                            },
+                            "assignees": null,
+                            "comments": 2
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "RamblingInLogin": {
+                "StatusCode": 200,
+                "StatusDescription": "OK",
+                "Headers": {
+                    "Link": false,
+                    "X-RateLimit-Remaining": "9"
+                },
+                "Content": {
+                    "items": [
+                        {
+                            "login": "RamblingCookieMonster",
+                            "type": "user",
+                            "url": "https://api.github.com/users/RamblingCookieMonster"
+                        },
+                        {
+                            "login": "rambling",
+                            "type": "user",
+                            "url": "https://api.github.com/users/rambling"
+                        }
+                    ]
+                }
+            }
         }
     ]
 }

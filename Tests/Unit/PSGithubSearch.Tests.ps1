@@ -130,7 +130,7 @@ Describe 'Find-GitHubCode' {
             It 'All results have the specified keywords when multiple keywords are specified' {
                 Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.MultiKeywords }
                 Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.MultiKeywords.Content }
-                $MultiKeyword = Find-GitHubCode -Keywords 'Deployment','Validation' -In path
+                $MultiKeyword = Find-GitHubCode -Keywords 'Deployment','Validation' -In path -Language 'PowerShell'
 
                 Foreach ( $Result in $MultiKeyword ) {
                     $Result.path | Should Match 'Deployment'
@@ -210,7 +210,7 @@ Describe 'Find-GitHubIssue' {
             It 'All issues were opened by the user specified via the Author parameter' {
                 Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.AuthorSnover }
                 Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.AuthorSnover.Content }
-                $AuthorTest = Find-GitHubIssue -Author 'jpsnover' -Type issue
+                $AuthorTest = Find-GitHubIssue -Author 'jpsnover' -Type issue -Mentions 'jpsnover'
 
                 Foreach ( $Result in $AuthorTest ) {
                     $Result.user.login | Should Be 'jpsnover'
@@ -219,7 +219,7 @@ Describe 'Find-GitHubIssue' {
             It 'All results have the type specified via the Type parameter' {
                 Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.TypePR }
                 Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.TypePR.Content }
-                $TypeTest = Find-GitHubIssue -Type pr -Author 'mwrock'
+                $TypeTest = Find-GitHubIssue -Type pr -Author 'mwrock' -Commenter 'lzybkr'
 
                 Foreach ( $Result in $TypeTest ) {
                     $Result.pull_request | Should Not BeNullOrEmpty
@@ -251,68 +251,52 @@ Describe 'Find-GitHubIssue' {
                 Foreach ( $Result in $LabelTest ) {
                     $Result.labels.name -join ' ' | Should Match 'Area-Engine'
                 }
-            }<#
-            It 'All results have all the labels when multiple labels are specified via the Labels parameter' {
-                
-                $LabelsTest = Find-GitHubIssue -Type issue -Repo 'powershell/powershell' -Labels 'Area-Engine','Area-Language'
-                
-                Foreach ( $Result in $LabelsTest ) {
-                    $Result.labels.name -join ' ' | Should Match 'Area-Engine'
-                }
-                Foreach ( $Result in $LabelsTest ) {
-                    $Result.labels.name -join ' ' | Should Match 'Area-Language'
-                }
             }
             It 'All results have the metadata field specified via the No parameter empty' {
-                
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.NoAssignee }
+                Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.NoAssignee.Content }
                 $NoTest = Find-GitHubIssue -Type issue -Repo 'powershell/powershell' -Labels 'Area-Test' -No assignee -State closed
 
                 Foreach ( $Result in $NoTest ) {
-                    ($Result.assignees).Count | Should Be 0
+                    $Result.assignees | Should BeNullOrEmpty
                 }
             }
-        }
-        
+        }        
         Context 'Sorting of search results' {
             It 'When the SortBy value is "comments", any result has more comments than the next one' {
-            
-                $SortByTest = Find-GitHubIssue -Type issue -Repo 'powershell/powershell' -Labels 'Area-Language' -SortBy comments
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.NoAssignee }
+                Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.NoAssignee.Content }
+                $SortByTest = Find-GitHubIssue -Type 'issue' -Labels 'Area-Test' -SortBy comments
 
-                Foreach ( $ResultIndex in 0.. ($SortByTest.Count - 2) ) {
-                    $SortByTest[$ResultIndex].comments + 1 |
-                    Should BeGreaterThan $SortByTest[$ResultIndex + 1].comments
-                }
+                $SortByTest[0].comments | Should BeGreaterThan $SortByTest[1].comments
             }
         }
     }
 }
 
 Describe 'Find-GitHubUser' {
-    
-    Context 'Keywords' {
-    
-        It 'All results have the specified keywords' {
+    InModuleScope $ModuleName {
         
-            $KeywordTest = Find-GithubUser -Type user -Keywords 'Rambling' -In login -Repos '>7'
+        $Mocks = ConvertFrom-Json (Get-Content -Path "$PSScriptRoot\..\TestData\MockObjects.json" -Raw )
+        
+        Context 'Keywords' {
+        
+            It 'All results have the specified keywords' {
+                Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.RamblingInLogin }
+                Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.RamblingInLogin.Content }
+                $KeywordTest = Find-GithubUser -Type 'user' -Keywords 'Rambling' -In 'login' -Repos '>12'
 
-            Foreach ( $Result in $KeywordTest ) {
-                $Result.login | Should Match 'Rambling'
+                Foreach ( $Result in $KeywordTest ) {
+                    $Result.login | Should Match 'Rambling'
+                }
+            }
+        }    
+        Context 'Sorting of search results' {
+            
+            It 'When the $SortBy value is "followers", any result has more followers than the next one' {                
+                $SortByFollowers = Find-GithubUser -Type 'user' -Keywords 'Rambling' -In 'login' -Repos '>18' -SortBy 'followers'
+                $SortByFollowers[0].Followers | Should BeGreaterThan $SortByFollowers[1].Followers
             }
         }
     }
-    
-    Context 'Search qualifiers behaviour' {
-        
-        It 'All results have the specified keyword in the field specified via the In parameter' {
-        
-            $InTest = Find-GithubUser -Type user -Keywords 'Cookie' -In email
-
-            Foreach ( $Result in $InTest ) {
-                $Result.'Email Address' | Should Match 'Cookie'
-            }
-        }
-    }
-}#>
-    }
-}
 }

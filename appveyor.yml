@@ -2,40 +2,20 @@ version: 1.0.{build}
 
 image: Visual Studio 2017
 
-install:
+environment:
+  Coveralls_Key:
+    secure: 8k+ZP0tz89b1tE7yKah3uwxdbfkvgwWHlRwxQwPTQxLgkuJ8NWy4dd6BXsQ6/0aW
+  GitHub_Key:
+    secure: wtrwAJK+i7Ar5L8TXeXOUtsxmVD+2wXu9u9bOf6GRfPP0Xn2V4yqTatLwaT7VWA6
+  PSGallery_Key:
+    secure: 1OaraGK9SJwOoGVdOHdM1DH5rvfL2AcDfvUFvrMxKYIkqJ0LIw3rwe4nUhxMgBfE
+
+before_build:
   - ps: Write-Host "Build version :`  $env:APPVEYOR_BUILD_VERSION"
   - ps: Write-Host "Branch        :`  $env:APPVEYOR_REPO_BRANCH"
-  - ps: Install-Module Pester -Scope CurrentUser -SkipPublisherCheck -Force
-  - ps: Install-Module PsScriptAnalyzer -Scope CurrentUser -SkipPublisherCheck -Force
-  - ps: Install-Module PSCodeHealth -Scope CurrentUser -SkipPublisherCheck -Force
-  
-build: false
+  - ps: Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+  - ps: Install-Module InvokeBuild -Scope CurrentUser -AllowClobber -Force
+  - ps: Import-Module InvokeBuild
 
-test_script:
-  - ps: |
-      $UnitTestsOutput = Invoke-Pester -Script ".\Tests" -OutputFile TestsResults.xml -OutputFormat NUnitXml -PassThru
-      (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\TestsResults.xml))
-      $FailedCount = $UnitTestsOutput.FailedCount
-      If ($FailedCount -gt 0) {
-        Add-AppveyorMessage -Message "$($FailedCount) unit test(s) failed."
-
-        # Failing the build
-        Throw "Build failed because $($FailedCount) unit test(s) failed"
-      }
-
-  - ps: |
-      Add-AppveyorTest -Name "PsScriptAnalyzer" -Outcome Running
-      $ScriptAnalyzerResults = Invoke-ScriptAnalyzer -Path $pwd -Recurse -Severity Error -ErrorAction SilentlyContinue
-      If ($ScriptAnalyzerResults) {
-        $ScriptAnalyzerResultString = $ScriptAnalyzerResults | Out-String
-        Write-Warning $ScriptAnalyzerResultString
-        Add-AppveyorMessage -Message "PSScriptAnalyzer output contained one or more result(s) with 'Error' severity.`
-        Check the 'Tests' tab of this build for more details." -Category Error
-        Update-AppveyorTest -Name "PsScriptAnalyzer" -Outcome Failed -ErrorMessage $ScriptAnalyzerResultString
-        
-        # Failing the build
-        Throw "Build failed"
-      }
-      Else {
-        Update-AppveyorTest -Name "PsScriptAnalyzer" -Outcome Passed
-      }
+build_script:
+  - ps: Invoke-Build

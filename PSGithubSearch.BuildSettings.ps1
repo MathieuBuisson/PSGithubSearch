@@ -18,10 +18,8 @@ $Settings = @{
         PassThru = $True
     }
 
-    AnalyzeParams = @{
-        Path = "$PSScriptRoot\$($env:APPVEYOR_PROJECT_NAME)"
-        Severity = 'Error'
-        Recurse = $True
+    HealthReportParams = @{
+        Path = (Get-ChildItem -Path '.\PSGithubSearch\PSGithubSearch.psm1').FullName
     }
 
     GitHubKey = $env:GitHub_Key

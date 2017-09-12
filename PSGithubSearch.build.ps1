@@ -71,28 +71,21 @@ task Test Unit_Tests,
     Publish_Unit_Tests_Coverage,
     Upload_Test_Results_To_AppVeyor
 
-task Analyze {
+task Quality_Gate {
     Write-TaskBanner -TaskName $Task.Name
 
-    Add-AppveyorTest -Name 'Code Analysis' -Outcome Running
-    $AnalyzeSettings = $Settings.AnalyzeParams
-    $Script:AnalyzeFindings = Invoke-ScriptAnalyzer @AnalyzeSettings
+    Add-AppveyorTest -Name 'Quality Gate' -Outcome Running
+    $HealthReportSettings = $Settings.HealthReportParams
+    $Script:HealthReport = Invoke-PSCodeHealth @HealthReportSettings -TestsResult $Script:UnitTestsResult
 
-    If ( $AnalyzeFindings ) {
-        $FindingsString = $AnalyzeFindings | Out-String
-        Write-Warning $FindingsString
-        Update-AppveyorTest -Name 'Code Analysis' -Outcome Failed -ErrorMessage $FindingsString
+    If ( -not($Script:HealthReport) ) {
+        $ErrorMessage = 'Code health report failed the quality gate. Aborting build'
+        Update-AppveyorTest -Name 'Quality Gate' -Outcome Failed -ErrorMessage $ErrorMessage
+        Throw $ErrorMessage
     }
     Else {
-        Update-AppveyorTest -Name 'Code Analysis' -Outcome Passed
+        Update-AppveyorTest -Name 'Quality Gate' -Outcome Passed
     }
-}
-
-task Fail_If_Analyze_Findings {
-    Write-TaskBanner -TaskName $Task.Name
-
-    $FailureMessage = 'PSScriptAnalyzer found {0} issues. Aborting build' -f $AnalyzeFindings.Count
-    assert ( -not($AnalyzeFindings) ) $FailureMessage
 }
 
 task Set_Module_Version {
@@ -138,8 +131,7 @@ task Copy_Source_To_Build_Output {
 task . Clean,
     Install_Dependencies,
     Test,
-    Analyze,
-    Fail_If_Analyze_Findings,
+    Quality_Gate,
     Set_Module_Version,
     Push_Build_Changes_To_Repo,
     Copy_Source_To_Build_Output

@@ -77,6 +77,7 @@ task Quality_Gate {
     Add-AppveyorTest -Name 'Quality Gate' -Outcome Running
     $HealthReportSettings = $Settings.HealthReportParams
     $Script:HealthReport = Invoke-PSCodeHealth @HealthReportSettings -TestsResult $Script:UnitTestsResult
+    $Script:HealthReport | Format-List *
 
     If ( -not($Script:HealthReport) ) {
         $ErrorMessage = 'Code health report failed the quality gate. Aborting build'

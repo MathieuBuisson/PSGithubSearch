@@ -39,3 +39,6 @@ _TeamCity*
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
+
+# Build results
+[Bb]uildOutput/

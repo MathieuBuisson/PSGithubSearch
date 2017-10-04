@@ -1,94 +1,94 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
-<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="27" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2017-09-13" time="03:13:20">
+<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="27" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2017-10-04" time="02:26:26">
   <environment user="appveyor" machine-name="APPVYR-WIN" cwd="C:\projects\psgithubsearch" user-domain="APPVYR-WIN" platform="Microsoft Windows Server 2016 Datacenter|C:\Windows|\Device\Harddisk0\Partition4" nunit-version="2.5.8.0" os-version="10.0.14393" clr-version="4.0.30319.42000" />
   <culture-info current-culture="en-US" current-uiculture="en-US" />
-  <test-suite type="TestFixture" name="Pester" executed="True" result="Success" success="True" time="5.0323" asserts="0" description="Pester">
+  <test-suite type="TestFixture" name="Pester" executed="True" result="Success" success="True" time="5.3438" asserts="0" description="Pester">
     <results>
-      <test-suite type="TestFixture" name="C:\projects\psgithubsearch\Tests\Unit\PSGithubSearch.Tests.ps1" executed="True" result="Success" success="True" time="5.0323" asserts="0" description="C:\projects\psgithubsearch\Tests\Unit\PSGithubSearch.Tests.ps1">
+      <test-suite type="TestFixture" name="C:\projects\psgithubsearch\Tests\Unit\PSGithubSearch.Tests.ps1" executed="True" result="Success" success="True" time="5.3438" asserts="0" description="C:\projects\psgithubsearch\Tests\Unit\PSGithubSearch.Tests.ps1">
         <results>
-          <test-suite type="TestFixture" name="Find-GitHubRepository" executed="True" result="Success" success="True" time="3.0714" asserts="0" description="Find-GitHubRepository">
+          <test-suite type="TestFixture" name="Find-GitHubRepository" executed="True" result="Success" success="True" time="3.2574" asserts="0" description="Find-GitHubRepository">
             <results>
-              <test-suite type="TestFixture" name="Keywords" executed="True" result="Success" success="True" time="1.6584" asserts="0" description="Keywords">
+              <test-suite type="TestFixture" name="Keywords" executed="True" result="Success" success="True" time="1.8427" asserts="0" description="Keywords">
                 <results>
-                  <test-case description="All results have the specified keyword" name="Find-GitHubRepository.Keywords.All results have the specified keyword" time="1.6584" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All results have the specified keyword" name="Find-GitHubRepository.Keywords.All results have the specified keyword" time="1.8427" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
-              <test-suite type="TestFixture" name="Search qualifiers behaviour" executed="True" result="Success" success="True" time="1.2606" asserts="0" description="Search qualifiers behaviour">
+              <test-suite type="TestFixture" name="Search qualifiers behaviour" executed="True" result="Success" success="True" time="1.2554" asserts="0" description="Search qualifiers behaviour">
                 <results>
-                  <test-case description="All results have the specified language" name="Find-GitHubRepository.Search qualifiers behaviour.All results have the specified language" time="0.8356" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="All results have the specified keyword in the field specified via the In parameter" name="Find-GitHubRepository.Search qualifiers behaviour.All results have the specified keyword in the field specified via the In parameter" time="0.0592" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="All results match the size filter (greater than) specified via the SizeKB parameter" name="Find-GitHubRepository.Search qualifiers behaviour.All results match the size filter (greater than) specified via the SizeKB parameter" time="0.0738" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="All results are NOT forks if the Fork parameter is not used" name="Find-GitHubRepository.Search qualifiers behaviour.All results are NOT forks if the Fork parameter is not used" time="0.0637" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="All results are forks if the Fork parameter has the value &quot;only&quot;" name="Find-GitHubRepository.Search qualifiers behaviour.All results are forks if the Fork parameter has the value &quot;only&quot;" time="0.1406" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="All results have the owner specified via the User parameter" name="Find-GitHubRepository.Search qualifiers behaviour.All results have the owner specified via the User parameter" time="0.0426" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="All results match the stars filter specified via the Stars parameter" name="Find-GitHubRepository.Search qualifiers behaviour.All results match the stars filter specified via the Stars parameter" time="0.0453" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All results have the specified language" name="Find-GitHubRepository.Search qualifiers behaviour.All results have the specified language" time="0.7793" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All results have the specified keyword in the field specified via the In parameter" name="Find-GitHubRepository.Search qualifiers behaviour.All results have the specified keyword in the field specified via the In parameter" time="0.0656" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All results match the size filter (greater than) specified via the SizeKB parameter" name="Find-GitHubRepository.Search qualifiers behaviour.All results match the size filter (greater than) specified via the SizeKB parameter" time="0.0833" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All results are NOT forks if the Fork parameter is not used" name="Find-GitHubRepository.Search qualifiers behaviour.All results are NOT forks if the Fork parameter is not used" time="0.0853" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All results are forks if the Fork parameter has the value &quot;only&quot;" name="Find-GitHubRepository.Search qualifiers behaviour.All results are forks if the Fork parameter has the value &quot;only&quot;" time="0.1647" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All results have the owner specified via the User parameter" name="Find-GitHubRepository.Search qualifiers behaviour.All results have the owner specified via the User parameter" time="0.0349" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All results match the stars filter specified via the Stars parameter" name="Find-GitHubRepository.Search qualifiers behaviour.All results match the stars filter specified via the Stars parameter" time="0.0423" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
-              <test-suite type="TestFixture" name="Sorting of search results" executed="True" result="Success" success="True" time="0.1524" asserts="0" description="Sorting of search results">
+              <test-suite type="TestFixture" name="Sorting of search results" executed="True" result="Success" success="True" time="0.1593" asserts="0" description="Sorting of search results">
                 <results>
-                  <test-case description="When the $SortBy value is &quot;stars&quot;, any result has more stars than the next one" name="Find-GitHubRepository.Sorting of search results.When the $SortBy value is &quot;stars&quot;, any result has more stars than the next one" time="0.1037" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="When the  value is 'forks', any result has more forks than the next one" name="Find-GitHubRepository.Sorting of search results.When the  value is 'forks', any result has more forks than the next one" time="0.0487" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="When the $SortBy value is &quot;stars&quot;, any result has more stars than the next one" name="Find-GitHubRepository.Sorting of search results.When the $SortBy value is &quot;stars&quot;, any result has more stars than the next one" time="0.1064" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="When the  value is 'forks', any result has more forks than the next one" name="Find-GitHubRepository.Sorting of search results.When the  value is 'forks', any result has more forks than the next one" time="0.0529" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
             </results>
           </test-suite>
-          <test-suite type="TestFixture" name="Find-GitHubCode" executed="True" result="Success" success="True" time="0.4653" asserts="0" description="Find-GitHubCode">
+          <test-suite type="TestFixture" name="Find-GitHubCode" executed="True" result="Success" success="True" time="0.5493" asserts="0" description="Find-GitHubCode">
             <results>
-              <test-suite type="TestFixture" name="Defaut parameter set using positional parameters" executed="True" result="Success" success="True" time="0.1213" asserts="0" description="Defaut parameter set using positional parameters">
+              <test-suite type="TestFixture" name="Defaut parameter set using positional parameters" executed="True" result="Success" success="True" time="0.1391" asserts="0" description="Defaut parameter set using positional parameters">
                 <results>
-                  <test-case description="Should use the defaut parameter set and bind the second argument to the User parameter" name="Find-GitHubCode.Defaut parameter set using positional parameters.Should use the defaut parameter set and bind the second argument to the User parameter" time="0.1213" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should use the defaut parameter set and bind the second argument to the User parameter" name="Find-GitHubCode.Defaut parameter set using positional parameters.Should use the defaut parameter set and bind the second argument to the User parameter" time="0.1391" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
-              <test-suite type="TestFixture" name="Keywords" executed="True" result="Success" success="True" time="0.1313" asserts="0" description="Keywords">
+              <test-suite type="TestFixture" name="Keywords" executed="True" result="Success" success="True" time="0.2507" asserts="0" description="Keywords">
                 <results>
-                  <test-case description="All file results have the specified keyword in their path" name="Find-GitHubCode.Keywords.All file results have the specified keyword in their path" time="0.0752" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="All results have the specified keywords when multiple keywords are specified" name="Find-GitHubCode.Keywords.All results have the specified keywords when multiple keywords are specified" time="0.0561" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All file results have the specified keyword in their path" name="Find-GitHubCode.Keywords.All file results have the specified keyword in their path" time="0.0971" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All results have the specified keywords when multiple keywords are specified" name="Find-GitHubCode.Keywords.All results have the specified keywords when multiple keywords are specified" time="0.1536" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
-              <test-suite type="TestFixture" name="Search qualifiers behaviour" executed="True" result="Success" success="True" time="0.2127" asserts="0" description="Search qualifiers behaviour">
+              <test-suite type="TestFixture" name="Search qualifiers behaviour" executed="True" result="Success" success="True" time="0.1594" asserts="0" description="Search qualifiers behaviour">
                 <results>
-                  <test-case description="All results are from the repository specified via the Repo parameter" name="Find-GitHubCode.Search qualifiers behaviour.All results are from the repository specified via the Repo parameter" time="0.1218" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="All file results have the string specified via the FileName parameter in their name" name="Find-GitHubCode.Search qualifiers behaviour.All file results have the string specified via the FileName parameter in their name" time="0.0397" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="All file results have the extension specified via the Extension parameter" name="Find-GitHubCode.Search qualifiers behaviour.All file results have the extension specified via the Extension parameter" time="0.0512" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All results are from the repository specified via the Repo parameter" name="Find-GitHubCode.Search qualifiers behaviour.All results are from the repository specified via the Repo parameter" time="0.0746" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All file results have the string specified via the FileName parameter in their name" name="Find-GitHubCode.Search qualifiers behaviour.All file results have the string specified via the FileName parameter in their name" time="0.0428" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All file results have the extension specified via the Extension parameter" name="Find-GitHubCode.Search qualifiers behaviour.All file results have the extension specified via the Extension parameter" time="0.0421" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
             </results>
           </test-suite>
-          <test-suite type="TestFixture" name="Find-GitHubIssue" executed="True" result="Success" success="True" time="0.9149" asserts="0" description="Find-GitHubIssue">
+          <test-suite type="TestFixture" name="Find-GitHubIssue" executed="True" result="Success" success="True" time="0.7427" asserts="0" description="Find-GitHubIssue">
             <results>
-              <test-suite type="TestFixture" name="Keywords" executed="True" result="Success" success="True" time="0.0985" asserts="0" description="Keywords">
+              <test-suite type="TestFixture" name="Keywords" executed="True" result="Success" success="True" time="0.0976" asserts="0" description="Keywords">
                 <results>
-                  <test-case description="All results have the specified keywords when multiple keywords are specified" name="Find-GitHubIssue.Keywords.All results have the specified keywords when multiple keywords are specified" time="0.0985" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All results have the specified keywords when multiple keywords are specified" name="Find-GitHubIssue.Keywords.All results have the specified keywords when multiple keywords are specified" time="0.0976" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
-              <test-suite type="TestFixture" name="Search qualifiers behaviour" executed="True" result="Success" success="True" time="0.6278" asserts="0" description="Search qualifiers behaviour">
+              <test-suite type="TestFixture" name="Search qualifiers behaviour" executed="True" result="Success" success="True" time="0.5801" asserts="0" description="Search qualifiers behaviour">
                 <results>
-                  <test-case description="All results have the specified keyword in the field specified via the In parameter" name="Find-GitHubIssue.Search qualifiers behaviour.All results have the specified keyword in the field specified via the In parameter" time="0.077" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="All issues were opened by the user specified via the Author parameter" name="Find-GitHubIssue.Search qualifiers behaviour.All issues were opened by the user specified via the Author parameter" time="0.1572" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="All results have the type specified via the Type parameter" name="Find-GitHubIssue.Search qualifiers behaviour.All results have the type specified via the Type parameter" time="0.0467" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="All results have the assignee specified via the Assignee parameter" name="Find-GitHubIssue.Search qualifiers behaviour.All results have the assignee specified via the Assignee parameter" time="0.1162" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="All results have the state specified via the State parameter" name="Find-GitHubIssue.Search qualifiers behaviour.All results have the state specified via the State parameter" time="0.047" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="All results have the label specified via the Labels parameter" name="Find-GitHubIssue.Search qualifiers behaviour.All results have the label specified via the Labels parameter" time="0.044" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="All results have the metadata field specified via the No parameter empty" name="Find-GitHubIssue.Search qualifiers behaviour.All results have the metadata field specified via the No parameter empty" time="0.1397" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All results have the specified keyword in the field specified via the In parameter" name="Find-GitHubIssue.Search qualifiers behaviour.All results have the specified keyword in the field specified via the In parameter" time="0.1119" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All issues were opened by the user specified via the Author parameter" name="Find-GitHubIssue.Search qualifiers behaviour.All issues were opened by the user specified via the Author parameter" time="0.1345" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All results have the type specified via the Type parameter" name="Find-GitHubIssue.Search qualifiers behaviour.All results have the type specified via the Type parameter" time="0.0477" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All results have the assignee specified via the Assignee parameter" name="Find-GitHubIssue.Search qualifiers behaviour.All results have the assignee specified via the Assignee parameter" time="0.0812" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All results have the state specified via the State parameter" name="Find-GitHubIssue.Search qualifiers behaviour.All results have the state specified via the State parameter" time="0.1098" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All results have the label specified via the Labels parameter" name="Find-GitHubIssue.Search qualifiers behaviour.All results have the label specified via the Labels parameter" time="0.0438" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All results have the metadata field specified via the No parameter empty" name="Find-GitHubIssue.Search qualifiers behaviour.All results have the metadata field specified via the No parameter empty" time="0.0513" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
-              <test-suite type="TestFixture" name="Sorting of search results" executed="True" result="Success" success="True" time="0.1886" asserts="0" description="Sorting of search results">
+              <test-suite type="TestFixture" name="Sorting of search results" executed="True" result="Success" success="True" time="0.065" asserts="0" description="Sorting of search results">
                 <results>
-                  <test-case description="When the SortBy value is &quot;comments&quot;, any result has more comments than the next one" name="Find-GitHubIssue.Sorting of search results.When the SortBy value is &quot;comments&quot;, any result has more comments than the next one" time="0.1886" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="When the SortBy value is &quot;comments&quot;, any result has more comments than the next one" name="Find-GitHubIssue.Sorting of search results.When the SortBy value is &quot;comments&quot;, any result has more comments than the next one" time="0.065" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
             </results>
           </test-suite>
-          <test-suite type="TestFixture" name="Find-GitHubUser" executed="True" result="Success" success="True" time="0.5806" asserts="0" description="Find-GitHubUser">
+          <test-suite type="TestFixture" name="Find-GitHubUser" executed="True" result="Success" success="True" time="0.7943" asserts="0" description="Find-GitHubUser">
             <results>
-              <test-suite type="TestFixture" name="Keywords" executed="True" result="Success" success="True" time="0.1368" asserts="0" description="Keywords">
+              <test-suite type="TestFixture" name="Keywords" executed="True" result="Success" success="True" time="0.4238" asserts="0" description="Keywords">
                 <results>
-                  <test-case description="All results have the specified keywords" name="Find-GitHubUser.Keywords.All results have the specified keywords" time="0.1368" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="All results have the specified keywords" name="Find-GitHubUser.Keywords.All results have the specified keywords" time="0.4238" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
-              <test-suite type="TestFixture" name="Sorting of search results" executed="True" result="Success" success="True" time="0.4438" asserts="0" description="Sorting of search results">
+              <test-suite type="TestFixture" name="Sorting of search results" executed="True" result="Success" success="True" time="0.3705" asserts="0" description="Sorting of search results">
                 <results>
-                  <test-case description="When the $SortBy value is &quot;followers&quot;, any result has more followers than the next one" name="Find-GitHubUser.Sorting of search results.When the $SortBy value is &quot;followers&quot;, any result has more followers than the next one" time="0.4438" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="When the $SortBy value is &quot;followers&quot;, any result has more followers than the next one" name="Find-GitHubUser.Sorting of search results.When the $SortBy value is &quot;followers&quot;, any result has more followers than the next one" time="0.3705" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
             </results>

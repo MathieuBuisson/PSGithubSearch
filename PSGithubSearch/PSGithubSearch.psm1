@@ -497,128 +497,39 @@ Function Find-GitHubIssue {
         [string]$SortBy
     )
 
-    [string]$QueryString = 'q='
-    $EmptyQueryString = $True
-
     If ( $Keywords ) {
-        $QueryString += ($Keywords -join '+')
-        $EmptyQueryString = $False
-    }
-    If ( $Type ) {
-        If ( $EmptyQueryString ) {
-            $QueryString += 'type:' + $Type
-            $EmptyQueryString = $False
-        }
-        Else {
-            $QueryString += '+type:' + $Type
-        }
-    }
-    If ( $In ) {
-        If ( $EmptyQueryString ) {
-            $QueryString += 'in:' + $In
-            $EmptyQueryString = $False
-        }
-        Else {
-            $QueryString += '+in:' + $In
-        }
-    }
-    If ( $Author ) {
-        If ( $EmptyQueryString ) {
-            $QueryString += 'author:' + $Author
-            $EmptyQueryString = $False
-        }
-        Else {
-            $QueryString += '+author:' + $Author
-        }
-    }
-    If ( $Assignee ) {
-        If ( $EmptyQueryString ) {
-            $QueryString += 'assignee:' + $Assignee
-            $EmptyQueryString = $False
-        }
-        Else {
-            $QueryString += '+assignee:' + $Assignee
-        }
-    }
-    If ( $Mentions ) {
-        If ( $EmptyQueryString ) {
-            $QueryString += 'mentions:' + $Mentions
-            $EmptyQueryString = $False
-        }
-        Else {
-            $QueryString += '+mentions:' + $Mentions
-        }
-    }
-    If ( $Commenter ) {
-        If ( $EmptyQueryString ) {
-            $QueryString += 'commenter:' + $Commenter
-            $EmptyQueryString = $False
-        }
-        Else {
-            $QueryString += '+commenter:' + $Commenter
-        }
-    }
-    If ( $Involves ) {
-        If ( $EmptyQueryString ) {
-            $QueryString += 'involves:' + $Involves
-            $EmptyQueryString = $False
-        }
-        Else {
-            $QueryString += '+involves:' + $Involves
-        }
-    }
-    If ( $State ) {
-        If ( $EmptyQueryString ) {
-            $QueryString += 'state:' + $State
-            $EmptyQueryString = $False
-        }
-        Else {
-            $QueryString += '+state:' + $State
-        }
+        $KeywordFilter = $Keywords -join '+'
     }
     If ( $Labels ) {
-        If ( $EmptyQueryString ) {
-            $QueryString += ($Labels | ForEach-Object { 'label:' + $_ }) -join '+'
-            $EmptyQueryString = $False
-        }
-        Else {
-            Foreach ( $Label in $Labels ) { $QueryString += '+label:' + $Label }
-        }
+        $LabelsFilterArray = Foreach ( $Label in $Labels ) { 'label:{0}' -f $Label }
+        [string]$LabelsFilter = If ( $LabelsFilterArray.Count -gt 0 ) { $LabelsFilterArray -join '+' }
     }
-    If ( $No ) {
-        If ( $EmptyQueryString ) {
-            $QueryString += 'no:' + $No
-            $EmptyQueryString = $False
-        }
-        Else {
-            $QueryString += '+no:' + $No
-        }
+
+    # The remaining filters can be used the same way to build their respective filter strings
+    If ( $PSBoundParameters.ContainsKey('Keywords') ) {
+        $Null = $PSBoundParameters.Remove('Keywords')
     }
-    If ( $Language ) {
-        If ( $EmptyQueryString ) {
-            $QueryString += 'language:' + $Language
-            $EmptyQueryString = $False
-        }
-        Else {
-            $QueryString += '+language:' + $Language
-        }
+    If ( $PSBoundParameters.ContainsKey('Labels') ) {
+        $Null = $PSBoundParameters.Remove('Labels')
     }
-    If ( $Repo ) {
-        If ( $EmptyQueryString ) {
-            $QueryString += 'repo:' + $Repo
-            $EmptyQueryString = $False
-        }
-        Else {
-            $QueryString += '+repo:' + $Repo
-        }
+    If ( $PSBoundParameters.ContainsKey('SortBy') ) {
+        $Null = $PSBoundParameters.Remove('SortBy')
+    }    
+    [System.Collections.ArrayList]$JoinableFilterStrings = @()
+    Foreach ( $ParamName in $PSBoundParameters.Keys ) {
+        
+        $JoinableFilterString = '{0}:{1}' -f $ParamName.ToLower(), $PSBoundParameters[$ParamName]
+        $Null = $JoinableFilterStrings.Add($JoinableFilterString)
     }
+    $JoinedFilterStrings = If ($JoinableFilterStrings.Count -gt 0) {$JoinableFilterStrings -join '+'}
+    $JoinedFilter = ($KeywordFilter, $JoinedFilterStrings, $LabelsFilter -join '+').Trim('+')
+    $QueryString = 'q={0}' -f $JoinedFilter
+
     If ( $SortBy ) {
-        $QueryString += "&sort=$SortBy"
+        $QueryString += '&sort={0}' -f $SortBy
     }
-
-    # Using the maximum number of results per page to limit the number of requests
     $QueryString += '&per_page=100'
-
+    
     $UriBuilder = New-Object System.UriBuilder -ArgumentList 'https://api.github.com'
     $UriBuilder.Path = 'search/issues' -as [uri]
     $UriBuilder.Query = $QueryString

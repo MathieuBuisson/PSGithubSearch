@@ -84,7 +84,7 @@ task Fail_If_Quality_Goal_Not_Met {
     Add-AppveyorTest -Name 'Quality Gate' -Outcome Running
     $QualityGateSettings = $Settings.QualityGateParams
     $Compliance = Test-PSCodeHealthCompliance @QualityGateSettings -HealthReport $HealthReport
-    $Compliance
+    $Compliance | Select-Object 'MetricName','Value','Result'
     $FailedRules = $Compliance | Where-Object Result -eq 'Fail'
 
     If ( $FailedRules ) {

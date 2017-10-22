@@ -12,7 +12,7 @@
 RootModule = '.\PSGithubSearch.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.25'
+ModuleVersion = '1.0.27'
 
 # ID used to uniquely identify this module
 GUID = '7fbef890-14aa-4313-a90b-aedf28b13810'

@@ -297,6 +297,9 @@ Describe 'Find-GitHubUser' {
                 $SortByFollowers = Find-GithubUser -Type 'user' -Keywords 'Rambling' -In 'login' -Repos '>18' -SortBy 'followers'
                 $SortByFollowers[0].Followers | Should BeGreaterThan $SortByFollowers[1].Followers
             }
+            It 'Should return $True' {
+                $False | Should -Be $True
+            }
         }
     }
 }

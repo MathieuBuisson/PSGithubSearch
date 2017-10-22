@@ -13,13 +13,13 @@ $Settings = @{
 
     UnitTestParams = @{
         Script = '.\Tests\Unit'
-        CodeCoverage = (Get-ChildItem -Path '.\PSGithubSearch\PSGithubSearch.psm1').FullName
+        CodeCoverage = '.\PSGithubSearch\PSGithubSearch.psm1'
         OutputFile = "$PSScriptRoot\BuildOutput\UnitTestsResult.xml"
         PassThru = $True
     }
 
-    HealthReportParams = @{
-        Path = (Get-ChildItem -Path '.\PSGithubSearch\PSGithubSearch.psm1').FullName
+    CodeHealthParams = @{
+        Path = '.\PSGithubSearch\'
     }
 
     GitHubKey = $env:GitHub_Key

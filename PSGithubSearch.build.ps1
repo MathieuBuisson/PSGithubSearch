@@ -42,11 +42,21 @@ task Unit_Tests {
     $Script:UnitTestsResult = Invoke-Pester @UnitTestSettings
 }
 
+task Generate_Code_Health_Report {
+    Write-TaskBanner -TaskName $Task.Name
+
+    $CodeHealthSettings = $Settings.CodeHealthParams
+    $Script:HealthReport = Invoke-PSCodeHealth @CodeHealthSettings -TestsResult $UnitTestsResult
+}
+
 task Fail_If_Failed_Unit_Test {
     Write-TaskBanner -TaskName $Task.Name
 
-    $FailureMessage = '{0} Unit test(s) failed. Aborting build' -f $UnitTestsResult.FailedCount
-    assert ($UnitTestsResult.FailedCount -eq 0) $FailureMessage
+    $FailureMessage = '{0} Unit test(s) failed. Aborting build' -f $HealthReport.NumberOfFailedTests
+    If ( $HealthReport.NumberOfFailedTests -gt 0 ) {
+        $HealthReport.FailedTestsDetails | Out-String | Write-Warning
+    }
+    assert ($HealthReport.NumberOfFailedTests -eq 0) $FailureMessage
 }
 
 task Publish_Unit_Tests_Coverage {

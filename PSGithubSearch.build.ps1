@@ -42,21 +42,11 @@ task Unit_Tests {
     $Script:UnitTestsResult = Invoke-Pester @UnitTestSettings
 }
 
-task Generate_Code_Health_Report {
-    Write-TaskBanner -TaskName $Task.Name
-
-    $CodeHealthSettings = $Settings.CodeHealthParams
-    $Script:HealthReport = Invoke-PSCodeHealth @CodeHealthSettings -TestsResult $UnitTestsResult
-}
-
 task Fail_If_Failed_Unit_Test {
     Write-TaskBanner -TaskName $Task.Name
 
-    $FailureMessage = '{0} Unit test(s) failed. Aborting build' -f $HealthReport.NumberOfFailedTests
-    If ( $HealthReport.NumberOfFailedTests -gt 0 ) {
-        $HealthReport.FailedTestsDetails | Out-String | Write-Warning
-    }
-    assert ($HealthReport.NumberOfFailedTests -eq 0) $FailureMessage
+    $FailureMessage = '{0} Unit test(s) failed. Aborting build' -f $UnitTestsResult.FailedCount
+    assert ($UnitTestsResult.FailedCount -eq 0) $FailureMessage
 }
 
 task Publish_Unit_Tests_Coverage {
@@ -81,16 +71,26 @@ task Test Unit_Tests,
     Publish_Unit_Tests_Coverage,
     Upload_Test_Results_To_AppVeyor
 
-task Quality_Gate {
+task Generate_Quality_Report {
+    Write-TaskBanner -TaskName $Task.Name
+
+    $CodeHealthSettings = $Settings.CodeHealthParams
+    $Script:HealthReport = Invoke-PSCodeHealth @CodeHealthSettings -TestsResult $UnitTestsResult
+}
+
+task Fail_If_Quality_Goal_Not_Met {
     Write-TaskBanner -TaskName $Task.Name
 
     Add-AppveyorTest -Name 'Quality Gate' -Outcome Running
-    $HealthReportSettings = $Settings.HealthReportParams
-    $Script:HealthReport = Invoke-PSCodeHealth @HealthReportSettings -TestsResult $Script:UnitTestsResult
-    $Script:HealthReport | Select-Object -Property '*' -Exclude 'FunctionHealthRecords'
+    $QualityGateSettings = $Settings.QualityGateParams
+    $Compliance = Test-PSCodeHealthCompliance @QualityGateSettings -HealthReport $HealthReport
+    $Compliance
+    $FailedRules = $Compliance | Where-Object Result -eq 'Fail'
 
-    If ( -not($Script:HealthReport) ) {
-        $ErrorMessage = 'Code health report failed the quality gate. Aborting build'
+    If ( $FailedRules ) {
+        $WarningMessage = "Failed compliance rules : `n" + ($FailedRules | Out-String)
+        Write-Warning $WarningMessage
+        $ErrorMessage = "Project's code didn't pass the quality gate. Aborting build"
         Update-AppveyorTest -Name 'Quality Gate' -Outcome Failed -ErrorMessage $ErrorMessage
         Throw $ErrorMessage
     }
@@ -142,7 +142,8 @@ task Copy_Source_To_Build_Output {
 task . Clean,
     Install_Dependencies,
     Test,
-    Quality_Gate,
+    Generate_Quality_Report,
+    Fail_If_Quality_Goal_Not_Met,
     Set_Module_Version,
     Push_Build_Changes_To_Repo,
     Copy_Source_To_Build_Output

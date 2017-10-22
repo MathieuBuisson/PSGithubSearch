@@ -22,6 +22,16 @@ $Settings = @{
         Path = '.\PSGithubSearch\'
     }
 
+    QualityGateParams = @{
+        CustomSettingsPath = '.\ProjectRules.json'
+        SettingsGroup = 'OverallMetrics'
+        MetricName = @('LinesOfCodeAverage',
+            'TestCoverage',
+            'ScriptAnalyzerFindingsTotal'
+            'ComplexityAverage'
+        )
+    }
+
     GitHubKey = $env:GitHub_Key
     Email = 'MathieuBuisson@users.noreply.github.com'
     Name = 'Mathieu Buisson'

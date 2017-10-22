@@ -88,7 +88,8 @@ task Fail_If_Quality_Goal_Not_Met {
     $FailedRules = $Compliance | Where-Object Result -eq 'Fail'
 
     If ( $FailedRules ) {
-        $WarningMessage = "Failed compliance rules : `n" + ($FailedRules | Out-String)
+        $FailedString = $FailedRules | Select-Object 'MetricName','Value','Result' | Out-String
+        $WarningMessage = "Failed compliance rules : `n" + $FailedString
         Write-Warning $WarningMessage
         $ErrorMessage = "Project's code didn't pass the quality gate. Aborting build"
         Update-AppveyorTest -Name 'Quality Gate' -Outcome Failed -ErrorMessage $ErrorMessage

@@ -3,6 +3,13 @@
     ],
     "OverallMetrics": [
         {
+            "LinesOfCodeAverage": {
+                "WarningThreshold": 115,
+                "FailThreshold": 165,
+                "HigherIsBetter": false
+            }
+        },
+        {
             "TestCoverage": {
                 "WarningThreshold": 75,
                 "FailThreshold": 65,

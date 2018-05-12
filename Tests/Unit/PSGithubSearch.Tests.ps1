@@ -1,16 +1,30 @@
 $ModuleName = 'PSGithubSearch'
 Import-Module "$PSScriptRoot\..\..\$ModuleName\$ModuleName.psd1" -Force
 
+# Helper stuff
+Add-Type @"
+    using System.Net;
+    using System.Security.Cryptography.X509Certificates;
+    public class TrustAllCertsPolicy : ICertificatePolicy {
+        public bool CheckValidationResult(
+            ServicePoint srvPoint, X509Certificate certificate,
+            WebRequest request, int certificateProblem) {
+            return true;
+        }
+    }
+"@
+[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+
 Describe 'Find-GitHubRepository' {
     InModuleScope $ModuleName {
-        
+
         $Mocks = ConvertFrom-Json (Get-Content -Path "$PSScriptRoot\..\TestData\MockObjects.json" -Raw )
         Mock ConvertFrom-Json { return $InputObject }
-                
+
         Context 'Keywords' {
              $MockedResponse = $Mocks.'Invoke-WebRequest'.MathieuBuissonPowerShell
              Mock Invoke-WebRequest { $MockedResponse }
-             
+
             It 'All results have the specified keyword' {
 
                 $KeywordTest = Find-GitHubRepository -Keywords 'PowerShell' -User 'MathieuBuisson' -In description
@@ -21,9 +35,9 @@ Describe 'Find-GitHubRepository' {
             }
         }
         Context 'Search qualifiers behaviour' {
-            
+
             It 'All results have the specified language' {
-            
+
                 $LanguageTest = Find-GitHubRepository -Keywords 'script' -Language 'PowerShell' -User 'MathieuBuisson'
 
                 Foreach ( $Result in $LanguageTest ) {
@@ -63,7 +77,7 @@ Describe 'Find-GitHubRepository' {
                 }
             }
             It 'All results have the owner specified via the User parameter' {
-            
+
                 $UserTest = Find-GitHubRepository -Keywords 'PS' -User 'MathieuBuisson'
 
                 Foreach ( $Result in $UserTest ) {
@@ -80,11 +94,11 @@ Describe 'Find-GitHubRepository' {
             }
         }
         Context 'Sorting of search results' {
-            
+
             It 'When the $SortBy value is "stars", any result has more stars than the next one' {
                 Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.MoreThan20Stars }
                 Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.MoreThan20Stars.Content }
-                
+
                 $SortByTest = Find-GitHubRepository -Keywords 'Any' -SortBy 'stars'
                 $SortByTest[0].stargazers_count | Should BeGreaterThan $SortByTest[1].stargazers_count
 
@@ -92,7 +106,7 @@ Describe 'Find-GitHubRepository' {
             It "When the $SortBy value is 'forks', any result has more forks than the next one" {
                 Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.SortByForks }
                 Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.SortByForks.Content }
-                
+
                 $SortbyForks = Find-GitHubRepository -Keywords 'Any' -SortBy forks
                 $SortbyForks[0].forks | Should BeGreaterThan $SortbyForks[1].forks
             }
@@ -103,9 +117,9 @@ Describe 'Find-GitHubCode' {
     InModuleScope $ModuleName {
 
         $Mocks = ConvertFrom-Json (Get-Content -Path "$PSScriptRoot\..\TestData\MockObjects.json" -Raw )
-        
+
         Context 'Defaut parameter set using positional parameters' {
-            
+
             It 'Should use the defaut parameter set and bind the second argument to the User parameter' {
                 Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.ParameterSet }
                 Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.ParameterSet.Content }
@@ -117,7 +131,7 @@ Describe 'Find-GitHubCode' {
             }
         }
         Context 'Keywords' {
-            
+
             It 'All file results have the specified keyword in their path' {
                 Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.DeploymentInPath }
                 Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.DeploymentInPath.Content }
@@ -165,7 +179,7 @@ Describe 'Find-GitHubCode' {
                 Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.MultiKeywords }
                 Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.MultiKeywords.Content }
                 $ExtensionTest = Find-GitHubCode -Keywords 'Any' -User 'MathieuBuisson' -Extension 'ps1'
-                
+
                 Foreach ( $Result in $ExtensionTest ) {
                     $Result.name | Should Match '\.ps1$'
                 }
@@ -175,11 +189,11 @@ Describe 'Find-GitHubCode' {
 }
 Describe 'Find-GitHubIssue' {
     InModuleScope $ModuleName {
-        
+
         $Mocks = ConvertFrom-Json (Get-Content -Path "$PSScriptRoot\..\TestData\MockObjects.json" -Raw )
-        
+
         Context 'Keywords' {
-            
+
             It 'All results have the specified keywords when multiple keywords are specified' {
                 Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.IssueKeywords }
                 Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.IssueKeywords.Content }
@@ -192,9 +206,9 @@ Describe 'Find-GitHubIssue' {
                     $Result.title | Should Match 'sensitive'
                 }
             }
-        }    
+        }
         Context 'Search qualifiers behaviour' {
-            
+
             It 'All results have the specified keyword in the field specified via the In parameter' {
                 Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.IssueKeywords }
                 Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.IssueKeywords.Content }
@@ -261,7 +275,7 @@ Describe 'Find-GitHubIssue' {
                     $Result.assignees | Should BeNullOrEmpty
                 }
             }
-        }        
+        }
         Context 'Sorting of search results' {
             It 'When the SortBy value is "comments", any result has more comments than the next one' {
                 Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.NoAssignee }
@@ -276,11 +290,11 @@ Describe 'Find-GitHubIssue' {
 
 Describe 'Find-GitHubUser' {
     InModuleScope $ModuleName {
-        
+
         $Mocks = ConvertFrom-Json (Get-Content -Path "$PSScriptRoot\..\TestData\MockObjects.json" -Raw )
-        
+
         Context 'Keywords' {
-        
+
             It 'All results have the specified keywords' {
                 Mock Invoke-WebRequest { $Mocks.'Invoke-WebRequest'.RamblingInLogin }
                 Mock ConvertFrom-Json { $Mocks.'Invoke-WebRequest'.RamblingInLogin.Content }
@@ -290,10 +304,10 @@ Describe 'Find-GitHubUser' {
                     $Result.login | Should Match 'Rambling'
                 }
             }
-        }    
+        }
         Context 'Sorting of search results' {
-            
-            It 'When the $SortBy value is "followers", any result has more followers than the next one' {                
+
+            It 'When the $SortBy value is "followers", any result has more followers than the next one' {
                 $SortByFollowers = Find-GithubUser -Type 'user' -Keywords 'Rambling' -In 'login' -Repos '>18' -SortBy 'followers'
                 $SortByFollowers[0].Followers | Should BeGreaterThan $SortByFollowers[1].Followers
             }

@@ -1,6 +1,5 @@
 {
-    "PerFunctionMetrics": [
-    ],
+    "PerFunctionMetrics": [],
     "OverallMetrics": [
         {
             "LinesOfCodeAverage": {
@@ -14,13 +13,6 @@
                 "WarningThreshold": 75,
                 "FailThreshold": 65,
                 "HigherIsBetter": true
-            }
-        },
-        {
-            "ScriptAnalyzerFindingsTotal": {
-                "WarningThreshold": 0,
-                "FailThreshold": 0,
-                "HigherIsBetter": false
             }
         }
     ]

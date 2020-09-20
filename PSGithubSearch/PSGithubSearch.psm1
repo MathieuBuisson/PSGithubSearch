@@ -259,7 +259,7 @@ Function Find-GitHubCode {
         [string]$User,
 
         [Parameter(Position=1,ParameterSetName='Repo')]
-        [ValidatePattern('^[a-zA-Z]+/[a-zA-Z]+')]
+        [ValidatePattern('^[0-9a-zA-Z]+/[0-9a-zA-Z]+')]
         [string]$Repo,
 
         [Parameter(Position=2)]

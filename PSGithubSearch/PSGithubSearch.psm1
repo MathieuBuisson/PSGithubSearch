@@ -170,7 +170,7 @@ Function Find-GitHubRepository {
 
         # The search API limits the number of requests to 10 requests per minute and per IP address (for unauthenticated requests)
         # We might be subject to the limit on the number of requests if we run function multiple times in the last minute
-        $RemainingRequestsNumber = $PageResponse.Headers.'X-RateLimit-Remaining' -as [int]
+        $RemainingRequestsNumber = $PageResponse.Headers.'X-RateLimit-Remaining'[0] -as [int]
         Write-Verbose "Number of remaining API requests : $($RemainingRequestsNumber)."
 
         If ( $RemainingRequestsNumber -le 1 ) {
@@ -353,7 +353,7 @@ Function Find-GitHubCode {
 
         # The search API limits the number of requests to 10 requests per minute and per IP address (for unauthenticated requests)
         # We might be subject to the limit on the number of requests if we run function multiple times in the last minute
-        $RemainingRequestsNumber = $PageResponse.Headers.'X-RateLimit-Remaining' -as [int]
+        $RemainingRequestsNumber = $PageResponse.Headers.'X-RateLimit-Remaining'[0] -as [int]
         Write-Verbose "Number of remaining API requests : $($RemainingRequestsNumber)."
 
         If ( $RemainingRequestsNumber -le 1 ) {
@@ -558,7 +558,7 @@ Function Find-GitHubIssue {
 
         # The search API limits the number of requests to 10 requests per minute and per IP address (for unauthenticated requests)
         # We might be subject to the limit on the number of requests if we run function multiple times in the last minute
-        $RemainingRequestsNumber = $PageResponse.Headers.'X-RateLimit-Remaining' -as [int]
+        $RemainingRequestsNumber = $PageResponse.Headers.'X-RateLimit-Remaining'[0] -as [int]
         Write-Verbose "Number of remaining API requests : $($RemainingRequestsNumber)."
 
         If ( $RemainingRequestsNumber -le 1 ) {
@@ -755,7 +755,7 @@ Function Find-GithubUser {
 
         # The search API limits the number of requests to 10 requests per minute and per IP address (for unauthenticated requests)
         # We might be subject to the limit on the number of requests if we run function multiple times in the last minute
-        $RemainingRequestsNumber = $PageResponse.Headers.'X-RateLimit-Remaining' -as [int]
+        $RemainingRequestsNumber = $PageResponse.Headers.'X-RateLimit-Remaining'[0] -as [int]
         Write-Verbose "Number of remaining API requests : $($RemainingRequestsNumber)."
 
         If ( $RemainingRequestsNumber -le 1 ) {
@@ -769,7 +769,7 @@ Function Find-GithubUser {
                        
             $UserDetailsResponse = Invoke-WebRequest -Uri $PageResult.url
 
-            If ( ($UserDetailsResponse.Headers.'X-RateLimit-Remaining' -as [int]) -le 1 ) {
+            If ( ($UserDetailsResponse.Headers.'X-RateLimit-Remaining'[0] -as [int]) -le 1 ) {
                 Write-Warning "The search API limits the number of requests to 10 requests per minute"
                 Write-Warning "Waiting 60 seconds before processing the remaining result pages because we have exceeded this limit."
                 Start-Sleep -Seconds 60
